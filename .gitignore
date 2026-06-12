@@ -1,18 +1,22 @@
 # Dependency directories
 node_modules/
+jspm_packages/
 
-# Production build output
-dist/
-dist-ssr/
-
-# Environment files (Security)
+# Environment variables (CRITICAL SECURITY)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.*.local
 *.env
+.env.*
+
+# Output directories
+dist/
+dist-ssr/
+build/
+out/
+.next/
 
 # Logs
 logs
@@ -22,7 +26,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# System / Editor files
+# Server Local uploads cache
+backend/public/uploads/*
+!backend/public/uploads/.gitkeep
+
+# IDEs and System files
 .vscode/
 .idea/
 .DS_Store
@@ -30,3 +38,5 @@ pnpm-debug.log*
 *.ntvs*
 *.njsproj
 *.sln
+*.swp
+Thumbs.db
