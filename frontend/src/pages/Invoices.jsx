@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import API from '../services/api';
+import API, { BACKEND_URL } from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -192,7 +192,7 @@ const Invoices = () => {
 
   const downloadPDF = (invoiceId, invoiceNum) => {
     toast.loading('Generating PDF...', { duration: 1500 });
-    window.open(`http://localhost:5000/api/v1/invoices/${invoiceId}/pdf`, '_blank');
+    window.open(`${BACKEND_URL}/api/v1/invoices/${invoiceId}/pdf`, '_blank');
   };
 
   const printInvoice = async (invId) => {

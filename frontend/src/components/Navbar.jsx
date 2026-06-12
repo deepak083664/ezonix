@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Sun, Moon, LogOut, User as UserIcon, Building2, Search, Menu, X, Users, Package, FileText, Bell, Plus, Settings, ChevronDown, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import API from '../services/api';
+import API, { BACKEND_URL } from '../services/api';
 
 const Navbar = ({ onMobileToggle }) => {
   const { user, logout } = useAuth();
@@ -142,7 +142,7 @@ const Navbar = ({ onMobileToggle }) => {
         <div className="hidden items-center gap-3 sm:flex">
           {logo ? (
             <img
-              src={logo.startsWith('http') ? logo : `http://localhost:5000${logo}`}
+              src={logo.startsWith('http') ? logo : `${BACKEND_URL}${logo}`}
               alt="Logo"
               className="h-8 w-8 rounded-lg object-contain"
             />

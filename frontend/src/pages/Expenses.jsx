@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import API from '../services/api';
+import API, { BACKEND_URL } from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -119,7 +119,7 @@ const Expenses = () => {
       accessor: 'receiptUrl',
       render: (val) => {
         if (!val) return '-';
-        const fullUrl = val.startsWith('http') ? val : `http://localhost:5000${val}`;
+        const fullUrl = val.startsWith('http') ? val : `${BACKEND_URL}${val}`;
         return (
           <a
             href={fullUrl}

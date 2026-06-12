@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import API from '../services/api';
+import API, { BACKEND_URL } from '../services/api';
 import { FileDown, Calendar, FileJson, FileSpreadsheet, ServerCrash } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -52,7 +52,7 @@ const Reports = () => {
 
   const handleExportExcel = () => {
     const datesParam = `?startDate=${startDate}&endDate=${endDate}`;
-    const url = `http://localhost:5000/api/v1/reports/${reportType}/excel${datesParam}`;
+    const url = `${BACKEND_URL}/api/v1/reports/${reportType}/excel${datesParam}`;
     window.open(url, '_blank');
     toast.success('Downloading Excel Report sheet...');
   };
@@ -60,7 +60,7 @@ const Reports = () => {
   // Bulk Export Handlers
   const handleBulkExport = (format) => {
     const endpoint = format === 'excel' ? 'excel' : 'json';
-    const url = `http://localhost:5000/api/v1/reports/export/${endpoint}`;
+    const url = `${BACKEND_URL}/api/v1/reports/export/${endpoint}`;
     window.open(url, '_blank');
     toast.success(`Exporting complete business database in ${format.toUpperCase()} format...`);
   };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import API from '../services/api';
+import API, { BACKEND_URL } from '../services/api';
 import DataTable from '../components/DataTable';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -164,7 +164,7 @@ const Products = () => {
         <div className="flex items-center gap-3">
           {row.image ? (
             <img
-              src={row.image.startsWith('http') ? row.image : `http://localhost:5000${row.image}`}
+              src={row.image.startsWith('http') ? row.image : `${BACKEND_URL}${row.image}`}
               alt={val}
               className="h-10 w-10 rounded-lg object-cover border border-slate-100 dark:border-slate-800"
             />

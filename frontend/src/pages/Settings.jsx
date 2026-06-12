@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import API from '../services/api';
+import API, { BACKEND_URL } from '../services/api';
 import { useForm } from 'react-hook-form';
 import { Building2, Save, Image as ImageIcon, ShieldAlert, BadgeAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -32,7 +32,7 @@ const Settings = () => {
         setValue('invoicePrefix', s.invoicePrefix);
         setValue('defaultTaxRate', s.defaultTaxRate);
         if (s.logoUrl) {
-          setLogoPreview(s.logoUrl.startsWith('http') ? s.logoUrl : `http://localhost:5000${s.logoUrl}`);
+          setLogoPreview(s.logoUrl.startsWith('http') ? s.logoUrl : `${BACKEND_URL}${s.logoUrl}`);
         }
       }
     } catch (err) {
@@ -72,7 +72,7 @@ const Settings = () => {
         setLogoPreview(
           res.data.data.setting.logoUrl.startsWith('http')
             ? res.data.data.setting.logoUrl
-            : `http://localhost:5000${res.data.data.setting.logoUrl}`
+            : `${BACKEND_URL}${res.data.data.setting.logoUrl}`
         );
       }
       // Refresh page context (can reload setting)
