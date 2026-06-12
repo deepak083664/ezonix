@@ -8,10 +8,18 @@ let uploadMemory;
 let uploadLocal;
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
+  if (file.fieldname === 'receipt') {
+    if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type! Receipts must be images or PDF files.'), false);
+    }
   } else {
-    cb(new Error('Not an image! Please upload only images.'), false);
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not an image! Please upload only images.'), false);
+    }
   }
 };
 
@@ -65,12 +73,20 @@ const upload = {
 
           try {
             // Upload memory buffer to Cloudinary
+            const isPdf = req.file.mimetype === 'application/pdf';
+            const uploadOptions = {
+              folder: 'crm_uploads',
+            };
+            if (isPdf) {
+              uploadOptions.resource_type = 'raw';
+            } else {
+              uploadOptions.allowed_formats = ['jpg', 'png', 'jpeg', 'webp'];
+            }
+
+            // Upload memory buffer to Cloudinary
             const result = await new Promise((resolve, reject) => {
               const stream = cloudinary.uploader.upload_stream(
-                {
-                  folder: 'crm_uploads',
-                  allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-                },
+                uploadOptions,
                 (error, uploadResult) => {
                   if (error) reject(error);
                   else resolve(uploadResult);

@@ -4,6 +4,7 @@ const { deleteFile } = require('../middleware/uploadMiddleware');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const logActivity = require('../utils/activityLogger');
+const escapeRegExp = require('../utils/escapeRegExp');
 
 // ==========================================
 // CATEGORY CONTROLLERS
@@ -25,7 +26,7 @@ exports.createCategory = catchAsync(async (req, res, next) => {
   
   await logActivity('Category Created', `Added product category: ${newCategory.name}`, req);
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       category: newCategory,
@@ -80,10 +81,11 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
   let query = {};
 
   if (search) {
+    const escapedSearch = escapeRegExp(search);
     query = {
       $or: [
-        { name: { $regex: search, $options: 'i' } },
-        { sku: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapedSearch, $options: 'i' } },
+        { sku: { $regex: escapedSearch, $options: 'i' } },
       ],
     };
   }
@@ -151,7 +153,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
 
   await logActivity('Product Added', `Registered product item: ${newProduct.name} (SKU: ${newProduct.sku})`, req);
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       product: newProduct,

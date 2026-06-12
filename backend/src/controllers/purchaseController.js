@@ -2,16 +2,18 @@ const Purchase = require('../models/Purchase');
 const Product = require('../models/Product');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const escapeRegExp = require('../utils/escapeRegExp');
 
 exports.getAllPurchases = catchAsync(async (req, res, next) => {
   const { search, page = 1, limit = 10 } = req.query;
   let query = {};
 
   if (search) {
+    const escapedSearch = escapeRegExp(search);
     query = {
       $or: [
-        { supplierName: { $regex: search, $options: 'i' } },
-        { invoiceNumber: { $regex: search, $options: 'i' } },
+        { supplierName: { $regex: escapedSearch, $options: 'i' } },
+        { invoiceNumber: { $regex: escapedSearch, $options: 'i' } },
       ],
     };
   }
@@ -44,7 +46,7 @@ exports.createPurchase = catchAsync(async (req, res, next) => {
     for (const item of items) {
       // Find product by exact SKU or Name (case insensitive)
       const product = await Product.findOne({
-        $or: [{ sku: item.name.toUpperCase() }, { name: { $regex: new RegExp(`^${item.name}$`, 'i') } }],
+        $or: [{ sku: item.name.toUpperCase() }, { name: { $regex: new RegExp(`^${escapeRegExp(item.name)}$`, 'i') } }],
       });
 
       if (product) {
@@ -62,7 +64,7 @@ exports.createPurchase = catchAsync(async (req, res, next) => {
     invoiceNumber,
   });
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       purchase: newPurchase,
@@ -81,7 +83,7 @@ exports.deletePurchase = catchAsync(async (req, res, next) => {
   if (purchase.items && purchase.items.length > 0) {
     for (const item of purchase.items) {
       const product = await Product.findOne({
-        $or: [{ sku: item.name.toUpperCase() }, { name: { $regex: new RegExp(`^${item.name}$`, 'i') } }],
+        $or: [{ sku: item.name.toUpperCase() }, { name: { $regex: new RegExp(`^${escapeRegExp(item.name)}$`, 'i') } }],
       });
       if (product) {
         product.quantity = Math.max(0, product.quantity - parseInt(item.quantity));

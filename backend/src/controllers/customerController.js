@@ -4,17 +4,19 @@ const Payment = require('../models/Payment');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const logActivity = require('../utils/activityLogger');
+const escapeRegExp = require('../utils/escapeRegExp');
 
 exports.getAllCustomers = catchAsync(async (req, res, next) => {
   const { search, page = 1, limit = 10 } = req.query;
   let query = {};
 
   if (search) {
+    const escapedSearch = escapeRegExp(search);
     query = {
       $or: [
-        { name: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapedSearch, $options: 'i' } },
+        { phone: { $regex: escapedSearch, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
       ],
     };
   }
@@ -59,7 +61,7 @@ exports.createCustomer = catchAsync(async (req, res, next) => {
 
   await logActivity('Customer Created', `Added customer profile: ${newCustomer.name}`, req);
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       customer: newCustomer,

@@ -23,6 +23,10 @@ import Incomes from './pages/Incomes';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 
+// New SaaS views
+import LandingPage from './pages/LandingPage';
+import AdminDashboard from './pages/AdminDashboard';
+
 // New Mock SaaS views
 import Leads from './pages/Leads';
 import Tasks from './pages/Tasks';
@@ -31,7 +35,7 @@ import Communication from './pages/Communication';
 
 // Protected Route Wrapper Component
 const ProtectedLayout = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) {
@@ -67,13 +71,16 @@ const ProtectedLayout = () => {
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             
+            {/* SaaS Admin Panel */}
+            <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/app" replace />} />
+            
             {/* New mock SaaS page paths */}
             <Route path="/leads" element={<Leads />} />
             <Route path="/tasks" element={<Tasks />} />
             <Route path="/documents" element={<Documents />} />
             <Route path="/communication" element={<Communication />} />
 
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/app" replace />} />
           </Routes>
         </main>
       </div>
@@ -147,11 +154,17 @@ const App = () => {
         <Router>
           <CommandPalette />
           <Routes>
+            {/* Public Landing Page */}
+            <Route path="/" element={<LandingPage />} />
+            
             {/* Public Auth Routes */}
             <Route path="/login" element={<Login />} />
 
             {/* Protected CRM Dashboard Layout */}
-            <Route path="/*" element={<ProtectedLayout />} />
+            <Route path="/app/*" element={<ProtectedLayout />} />
+
+            {/* Catch-all redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Toaster
             position="top-right"

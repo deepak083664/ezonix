@@ -16,12 +16,13 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: 'admin',
+      enum: ['admin', 'manager', 'staff'],
+      default: 'staff',
     },
     googleId: {
       type: String,
-      required: [true, 'Google ID is required'],
       unique: true,
+      sparse: true,
     },
     avatar: {
       type: String,
@@ -30,6 +31,10 @@ const userSchema = new mongoose.Schema(
     active: {
       type: Boolean,
       default: true,
+    },
+    isInvited: {
+      type: Boolean,
+      default: false,
     },
   },
   {

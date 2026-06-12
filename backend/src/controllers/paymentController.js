@@ -46,6 +46,15 @@ exports.recordPayment = catchAsync(async (req, res, next) => {
     return next(new AppError('This invoice has already been fully paid!', 400));
   }
 
+  if (parseFloat(amountPaid) > invoice.amountDue) {
+    return next(
+      new AppError(
+        `Payment amount ($${amountPaid}) cannot exceed the remaining invoice amount due ($${invoice.amountDue.toFixed(2)})`,
+        400
+      )
+    );
+  }
+
   const newPayment = await Payment.create({
     invoice: invoiceId,
     customer: invoice.customer,
@@ -76,7 +85,7 @@ exports.recordPayment = catchAsync(async (req, res, next) => {
     req
   );
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       payment: newPayment,

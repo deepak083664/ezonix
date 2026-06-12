@@ -3,6 +3,7 @@ const { deleteFile } = require('../middleware/uploadMiddleware');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const logActivity = require('../utils/activityLogger');
+const escapeRegExp = require('../utils/escapeRegExp');
 
 exports.getAllExpenses = catchAsync(async (req, res, next) => {
   const { category, search, page = 1, limit = 10 } = req.query;
@@ -13,7 +14,7 @@ exports.getAllExpenses = catchAsync(async (req, res, next) => {
   }
 
   if (search) {
-    query.description = { $regex: search, $options: 'i' };
+    query.description = { $regex: escapeRegExp(search), $options: 'i' };
   }
 
   const skip = (page - 1) * limit;
@@ -48,7 +49,7 @@ exports.createExpense = catchAsync(async (req, res, next) => {
 
   await logActivity('Expense Added', `Recorded $${newExpense.amount.toFixed(2)} under category: ${newExpense.category}`, req);
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       expense: newExpense,

@@ -15,7 +15,7 @@ const Login = () => {
     try {
       await loginWithGoogle(response.credential);
       toast.success('Successfully logged in with Google!');
-      navigate('/');
+      navigate('/app');
     } catch (err) {
       toast.error(err.message || 'Google authentication failed.');
     } finally {
@@ -28,7 +28,7 @@ const Login = () => {
     const initializeGoogle = () => {
       if (window.google?.accounts?.id) {
         window.google.accounts.id.initialize({
-          client_id: '992521949883-8r34va3qf8ffkc1lroqp0c1eaemrl3p2.apps.googleusercontent.com',
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '536012882296-158fbprbf62cvi6c9evin9thg93jrobo.apps.googleusercontent.com',
           callback: handleGoogleCallback,
         });
         window.google.accounts.id.renderButton(
@@ -54,7 +54,7 @@ const Login = () => {
     try {
       await loginWithGoogle('dev-bypass-admin');
       toast.success('Development bypass authentication successful!');
-      navigate('/');
+      navigate('/app');
     } catch (err) {
       toast.error('Bypass authentication failed');
     } finally {

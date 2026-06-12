@@ -33,7 +33,7 @@ exports.getAllIncomeSources = catchAsync(async (req, res, next) => {
 exports.createIncomeSource = catchAsync(async (req, res, next) => {
   const { name, description, color } = req.body;
 
-  const existing = await IncomeSource.findOne({ name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } });
+  const existing = await IncomeSource.findOne({ name: name.trim() }).collation({ locale: 'en', strength: 2 });
   if (existing) {
     return next(new AppError('An income source with this name already exists', 400));
   }
@@ -63,7 +63,7 @@ exports.updateIncomeSource = catchAsync(async (req, res, next) => {
   }
 
   if (name && name.trim().toLowerCase() !== source.name.toLowerCase()) {
-    const existing = await IncomeSource.findOne({ name: { $regex: new RegExp(`^${name.trim()}$`, 'i') } });
+    const existing = await IncomeSource.findOne({ name: name.trim() }).collation({ locale: 'en', strength: 2 });
     if (existing) {
       return next(new AppError('An income source with this name already exists', 400));
     }

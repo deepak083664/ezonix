@@ -1,21 +1,28 @@
+const mongoose = require('mongoose');
 const Income = require('../models/Income');
 const IncomeSource = require('../models/IncomeSource');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const logActivity = require('../utils/activityLogger');
+const escapeRegExp = require('../utils/escapeRegExp');
 
 exports.getAllIncomes = catchAsync(async (req, res, next) => {
   const { incomeSource, search, page = 1, limit = 10 } = req.query;
   let query = {};
 
   if (incomeSource) {
-    query.incomeSource = incomeSource;
+    try {
+      query.incomeSource = new mongoose.Types.ObjectId(incomeSource);
+    } catch (err) {
+      return next(new AppError('Invalid income source ID format', 400));
+    }
   }
 
   if (search) {
+    const escapedSearch = escapeRegExp(search);
     query.$or = [
-      { description: { $regex: search, $options: 'i' } },
-      { referenceNumber: { $regex: search, $options: 'i' } },
+      { description: { $regex: escapedSearch, $options: 'i' } },
+      { referenceNumber: { $regex: escapedSearch, $options: 'i' } },
     ];
   }
 

@@ -6,13 +6,14 @@ const { generateInvoicePDF } = require('../utils/pdfGenerator');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const logActivity = require('../utils/activityLogger');
+const escapeRegExp = require('../utils/escapeRegExp');
 
 exports.getAllInvoices = catchAsync(async (req, res, next) => {
   const { search, status, customer, page = 1, limit = 10 } = req.query;
   let query = {};
 
   if (search) {
-    query.invoiceNumber = { $regex: search, $options: 'i' };
+    query.invoiceNumber = { $regex: escapeRegExp(search), $options: 'i' };
   }
 
   if (status) {
@@ -146,7 +147,7 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
   const customerName = customer ? customer.name : 'Client';
   await logActivity('Invoice Created', `Generated invoice ${invoiceNumber} for ${customerName} ($${grandTotal.toFixed(2)})`, req);
 
-  res.status(211).json({
+  res.status(201).json({
     status: 'success',
     data: {
       invoice: newInvoice,

@@ -19,6 +19,7 @@ import {
   CheckSquare,
   Folder,
   MessageSquare,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -27,21 +28,26 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Customers', path: '/customers', icon: Users },
-    { name: 'Products', path: '/products', icon: Package },
-    { name: 'Invoices', path: '/invoices', icon: FileSpreadsheet },
-    { name: 'Purchases', path: '/purchases', icon: ShoppingBag },
-    { name: 'Expenses', path: '/expenses', icon: Receipt },
-    { name: 'Payments', path: '/payments', icon: CreditCard },
-    { name: 'Incomes', path: '/incomes', icon: Coins },
-    { name: 'Leads', path: '/leads', icon: Flame },
-    { name: 'Tasks', path: '/tasks', icon: CheckSquare },
-    { name: 'Reports', path: '/reports', icon: BarChart3 },
-    { name: 'Documents', path: '/documents', icon: Folder },
-    { name: 'Communication', path: '/communication', icon: MessageSquare },
-    { name: 'Settings', path: '/settings', icon: Settings },
+    { name: 'Dashboard', path: '/app', icon: LayoutDashboard },
+    { name: 'Customers', path: '/app/customers', icon: Users },
+    { name: 'Products', path: '/app/products', icon: Package },
+    { name: 'Invoices', path: '/app/invoices', icon: FileSpreadsheet },
+    { name: 'Purchases', path: '/app/purchases', icon: ShoppingBag },
+    { name: 'Expenses', path: '/app/expenses', icon: Receipt },
+    { name: 'Payments', path: '/app/payments', icon: CreditCard },
+    { name: 'Incomes', path: '/app/incomes', icon: Coins },
+    { name: 'Leads', path: '/app/leads', icon: Flame },
+    { name: 'Tasks', path: '/app/tasks', icon: CheckSquare },
+    { name: 'Reports', path: '/app/reports', icon: BarChart3 },
+    { name: 'Documents', path: '/app/documents', icon: Folder },
+    { name: 'Communication', path: '/app/communication', icon: MessageSquare },
   ];
+
+  if (user?.role === 'admin') {
+    menuItems.push({ name: 'Admin Panel', path: '/app/admin', icon: Shield });
+  }
+
+  menuItems.push({ name: 'Settings', path: '/app/settings', icon: Settings });
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">

@@ -1,6 +1,7 @@
 const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Subscription = require('../models/Subscription');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
@@ -43,3 +44,30 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+exports.verifyAccountStatus = (req, res, next) => {
+  if (!req.user.isInvited || !req.user.active) {
+    return next(new AppError('You are not authorized to access this CRM.', 403));
+  }
+  next();
+};
+
+exports.verifySubscription = catchAsync(async (req, res, next) => {
+  // Admins bypass subscription checks
+  if (req.user.role === 'admin') {
+    return next();
+  }
+
+  // Search active subscription
+  const activeSub = await Subscription.findOne({
+    userId: req.user._id,
+    status: 'active',
+    expiryDate: { $gt: new Date() },
+  });
+
+  if (!activeSub) {
+    return next(new AppError('Your subscription is not active. Please contact your administrator.', 403));
+  }
+
+  next();
+});

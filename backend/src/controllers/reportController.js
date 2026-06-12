@@ -10,6 +10,26 @@ const Income = require('../models/Income');
 const IncomeSource = require('../models/IncomeSource');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const escapeRegExp = require('../utils/escapeRegExp');
+
+// Helper to validate and parse date inputs safely
+const parseDateInput = (dateStr) => {
+  if (!dateStr) return undefined;
+  const parsed = Date.parse(dateStr);
+  if (isNaN(parsed)) {
+    throw new AppError('Invalid date format provided. Please use YYYY-MM-DD.', 400);
+  }
+  return new Date(parsed);
+};
+
+// Helper to escape CSV/Excel formulas to prevent injection
+const sanitizeExcelVal = (val) => {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string' && /^[=\+\-\@\t\r]/.test(val)) {
+    return `'${val}`;
+  }
+  return val;
+};
 
 // ==========================================
 // METRICS & ALERTS & ACTIVITY FEED CONTROLLER
@@ -185,7 +205,7 @@ exports.globalSearch = catchAsync(async (req, res, next) => {
     });
   }
 
-  const regex = new RegExp(query, 'i');
+  const regex = new RegExp(escapeRegExp(query), 'i');
 
   const [customers, products, invoices] = await Promise.all([
     Customer.find({
@@ -286,14 +306,14 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
   );
   invoices.forEach((x) =>
     invSheet.addRow({
-      invoiceNumber: x.invoiceNumber,
-      customerName: x.customer?.name || 'Deleted Customer',
+      invoiceNumber: sanitizeExcelVal(x.invoiceNumber),
+      customerName: sanitizeExcelVal(x.customer?.name || 'Deleted Customer'),
       issueDate: new Date(x.issueDate).toLocaleDateString(),
       dueDate: new Date(x.dueDate).toLocaleDateString(),
       grandTotal: x.grandTotal,
       amountPaid: x.amountPaid,
       amountDue: x.amountDue,
-      status: x.status.toUpperCase(),
+      status: sanitizeExcelVal(x.status.toUpperCase()),
     })
   );
 
@@ -310,7 +330,15 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
     ],
     '1E293B'
   );
-  customers.forEach((x) => custSheet.addRow(x));
+  customers.forEach((x) =>
+    custSheet.addRow({
+      name: sanitizeExcelVal(x.name),
+      phone: sanitizeExcelVal(x.phone),
+      email: sanitizeExcelVal(x.email),
+      gstNumber: sanitizeExcelVal(x.gstNumber),
+      address: sanitizeExcelVal(x.address),
+    })
+  );
 
   // 3) Products Sheet
   const prodSheet = workbook.addWorksheet('Products');
@@ -328,9 +356,9 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
   );
   products.forEach((x) =>
     prodSheet.addRow({
-      sku: x.sku,
-      name: x.name,
-      categoryName: x.category?.name || 'N/A',
+      sku: sanitizeExcelVal(x.sku),
+      name: sanitizeExcelVal(x.name),
+      categoryName: sanitizeExcelVal(x.category?.name || 'N/A'),
       price: x.price,
       quantity: x.quantity,
       lowStockThreshold: x.lowStockThreshold,
@@ -351,8 +379,8 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
   );
   purchases.forEach((x) =>
     purSheet.addRow({
-      supplierName: x.supplierName,
-      invoiceNumber: x.invoiceNumber || 'N/A',
+      supplierName: sanitizeExcelVal(x.supplierName),
+      invoiceNumber: sanitizeExcelVal(x.invoiceNumber || 'N/A'),
       purchaseDate: new Date(x.purchaseDate).toLocaleDateString(),
       amount: x.amount,
     })
@@ -372,10 +400,10 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
   );
   expenses.forEach((x) =>
     expSheet.addRow({
-      category: x.category,
+      category: sanitizeExcelVal(x.category),
       amount: x.amount,
       date: new Date(x.date).toLocaleDateString(),
-      description: x.description || '',
+      description: sanitizeExcelVal(x.description || ''),
     })
   );
 
@@ -394,11 +422,11 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
   );
   payments.forEach((x) =>
     paySheet.addRow({
-      invoiceNum: x.invoice?.invoiceNumber || 'Deleted Invoice',
-      customerName: x.customer?.name || 'Deleted Customer',
+      invoiceNum: sanitizeExcelVal(x.invoice?.invoiceNumber || 'Deleted Invoice'),
+      customerName: sanitizeExcelVal(x.customer?.name || 'Deleted Customer'),
       amountPaid: x.amountPaid,
       paymentDate: new Date(x.paymentDate).toLocaleDateString(),
-      paymentMethod: x.paymentMethod,
+      paymentMethod: sanitizeExcelVal(x.paymentMethod),
     })
   );
 
@@ -418,12 +446,12 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
   );
   incomes.forEach((x) =>
     incomeSheet.addRow({
-      incomeSourceName: x.incomeSource?.name || 'Deleted Source',
+      incomeSourceName: sanitizeExcelVal(x.incomeSource?.name || 'Deleted Source'),
       amount: x.amount,
       date: new Date(x.date).toLocaleDateString(),
-      receivedThrough: x.receivedThrough,
-      referenceNumber: x.referenceNumber || 'N/A',
-      description: x.description || '',
+      receivedThrough: sanitizeExcelVal(x.receivedThrough),
+      referenceNumber: sanitizeExcelVal(x.referenceNumber || 'N/A'),
+      description: sanitizeExcelVal(x.description || ''),
     })
   );
 
@@ -447,8 +475,8 @@ exports.getSalesReport = catchAsync(async (req, res, next) => {
 
   if (startDate || endDate) {
     filter.issueDate = {};
-    if (startDate) filter.issueDate.$gte = new Date(startDate);
-    if (endDate) filter.issueDate.$lte = new Date(endDate);
+    if (startDate) filter.issueDate.$gte = parseDateInput(startDate);
+    if (endDate) filter.issueDate.$lte = parseDateInput(endDate);
   }
 
   const invoices = await Invoice.find(filter)
@@ -470,8 +498,8 @@ exports.getExpenseReport = catchAsync(async (req, res, next) => {
 
   if (startDate || endDate) {
     filter.date = {};
-    if (startDate) filter.date.$gte = new Date(startDate);
-    if (endDate) filter.date.$lte = new Date(endDate);
+    if (startDate) filter.date.$gte = parseDateInput(startDate);
+    if (endDate) filter.date.$lte = parseDateInput(endDate);
   }
 
   if (category) {
@@ -495,8 +523,8 @@ exports.getPurchaseReport = catchAsync(async (req, res, next) => {
 
   if (startDate || endDate) {
     filter.purchaseDate = {};
-    if (startDate) filter.purchaseDate.$gte = new Date(startDate);
-    if (endDate) filter.purchaseDate.$lte = new Date(endDate);
+    if (startDate) filter.purchaseDate.$gte = parseDateInput(startDate);
+    if (endDate) filter.purchaseDate.$lte = parseDateInput(endDate);
   }
 
   const purchases = await Purchase.find(filter).sort({ purchaseDate: -1 });
@@ -516,8 +544,8 @@ exports.getIncomeReport = catchAsync(async (req, res, next) => {
 
   if (startDate || endDate) {
     filter.date = {};
-    if (startDate) filter.date.$gte = new Date(startDate);
-    if (endDate) filter.date.$lte = new Date(endDate);
+    if (startDate) filter.date.$gte = parseDateInput(startDate);
+    if (endDate) filter.date.$lte = parseDateInput(endDate);
   }
 
   if (incomeSource) {
@@ -559,8 +587,8 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
   if (reportType === 'sales') {
     if (startDate || endDate) {
       filter.issueDate = {};
-      if (startDate) filter.issueDate.$gte = new Date(startDate);
-      if (endDate) filter.issueDate.$lte = new Date(endDate);
+      if (startDate) filter.issueDate.$gte = parseDateInput(startDate);
+      if (endDate) filter.issueDate.$lte = parseDateInput(endDate);
     }
     const invoices = await Invoice.find(filter).populate('customer', 'name').sort({ issueDate: -1 });
 
@@ -580,21 +608,21 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
     );
     invoices.forEach((x) =>
       sheet.addRow({
-        invoiceNumber: x.invoiceNumber,
-        customerName: x.customer?.name || 'Deleted Customer',
+        invoiceNumber: sanitizeExcelVal(x.invoiceNumber),
+        customerName: sanitizeExcelVal(x.customer?.name || 'Deleted Customer'),
         issueDate: new Date(x.issueDate).toLocaleDateString(),
         dueDate: new Date(x.dueDate).toLocaleDateString(),
         grandTotal: x.grandTotal,
         amountPaid: x.amountPaid,
         amountDue: x.amountDue,
-        status: x.status.toUpperCase(),
+        status: sanitizeExcelVal(x.status.toUpperCase()),
       })
     );
   } else if (reportType === 'expenses') {
     if (startDate || endDate) {
       filter.date = {};
-      if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
+      if (startDate) filter.date.$gte = parseDateInput(startDate);
+      if (endDate) filter.date.$lte = parseDateInput(endDate);
     }
     const expenses = await Expense.find(filter).sort({ date: -1 });
 
@@ -610,17 +638,17 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
     );
     expenses.forEach((x) =>
       sheet.addRow({
-        category: x.category,
+        category: sanitizeExcelVal(x.category),
         amount: x.amount,
         date: new Date(x.date).toLocaleDateString(),
-        description: x.description || '',
+        description: sanitizeExcelVal(x.description || ''),
       })
     );
   } else if (reportType === 'purchases') {
     if (startDate || endDate) {
       filter.purchaseDate = {};
-      if (startDate) filter.purchaseDate.$gte = new Date(startDate);
-      if (endDate) filter.purchaseDate.$lte = new Date(endDate);
+      if (startDate) filter.purchaseDate.$gte = parseDateInput(startDate);
+      if (endDate) filter.purchaseDate.$lte = parseDateInput(endDate);
     }
     const purchases = await Purchase.find(filter).sort({ purchaseDate: -1 });
 
@@ -636,8 +664,8 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
     );
     purchases.forEach((x) =>
       sheet.addRow({
-        supplierName: x.supplierName,
-        invoiceNumber: x.invoiceNumber || 'N/A',
+        supplierName: sanitizeExcelVal(x.supplierName),
+        invoiceNumber: sanitizeExcelVal(x.invoiceNumber || 'N/A'),
         purchaseDate: new Date(x.purchaseDate).toLocaleDateString(),
         amount: x.amount,
       })
@@ -645,8 +673,8 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
   } else if (reportType === 'incomes') {
     if (startDate || endDate) {
       filter.date = {};
-      if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
+      if (startDate) filter.date.$gte = parseDateInput(startDate);
+      if (endDate) filter.date.$lte = parseDateInput(endDate);
     }
     const incomes = await Income.find(filter).populate('incomeSource', 'name').sort({ date: -1 });
 
@@ -664,12 +692,12 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
     );
     incomes.forEach((x) =>
       sheet.addRow({
-        incomeSourceName: x.incomeSource?.name || 'Deleted Source',
+        incomeSourceName: sanitizeExcelVal(x.incomeSource?.name || 'Deleted Source'),
         amount: x.amount,
         date: new Date(x.date).toLocaleDateString(),
-        receivedThrough: x.receivedThrough,
-        referenceNumber: x.referenceNumber || 'N/A',
-        description: x.description || '',
+        receivedThrough: sanitizeExcelVal(x.receivedThrough),
+        referenceNumber: sanitizeExcelVal(x.referenceNumber || 'N/A'),
+        description: sanitizeExcelVal(x.description || ''),
       })
     );
   } else {

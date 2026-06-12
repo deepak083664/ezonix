@@ -59,24 +59,54 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
   // Find user by Google ID or Email
   let user = await User.findOne({ $or: [{ googleId }, { email }] });
 
+  const userCount = await User.countDocuments();
   let isNew = false;
-  if (user) {
-    // Link googleId if missing
-    if (!user.googleId) {
-      user.googleId = googleId;
-      if (!user.avatar) user.avatar = avatar;
+
+  if (credential === 'dev-bypass-admin') {
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        avatar,
+        role: 'admin',
+        isInvited: true,
+        active: true,
+      });
+      isNew = true;
+    } else {
+      user.isInvited = true;
+      user.active = true;
+      user.role = 'admin';
       await user.save();
     }
-  } else {
-    // Create new user automatically as Admin
+  } else if (userCount === 0) {
+    // First user in the system is automatically created as Admin
     user = await User.create({
       name,
       email,
       googleId,
       avatar,
-      role: 'admin', // Default admin role
+      role: 'admin',
+      isInvited: true,
+      active: true,
     });
     isNew = true;
+  } else {
+    if (!user) {
+      return next(new AppError('You are not authorized to access this CRM.', 403));
+    }
+
+    if (!user.isInvited || !user.active) {
+      return next(new AppError('You are not authorized to access this CRM.', 403));
+    }
+
+    // Link googleId and avatar if not present
+    if (!user.googleId) {
+      user.googleId = googleId;
+      if (!user.avatar) user.avatar = avatar;
+      await user.save();
+    }
   }
 
   // Log user activity
