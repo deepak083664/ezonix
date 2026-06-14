@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -20,12 +20,55 @@ import {
   Folder,
   MessageSquare,
   Shield,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import Modal from './Modal';
+import toast from 'react-hot-toast';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [showAdminPassModal, setShowAdminPassModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showPasswordText, setShowPasswordText] = useState(false);
+
+  const handleLogoClick = () => {
+    if (user?.role !== 'admin') {
+      toast.error('Only administrators can access the Admin Panel.');
+      return;
+    }
+    setLogoClicks((prev) => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setShowAdminPassModal(true);
+        return 0;
+      }
+      return next;
+    });
+    // Reset click count after 3 seconds
+    setTimeout(() => {
+      setLogoClicks(0);
+    }, 3000);
+  };
+
+  const handleAdminPassSubmit = (e) => {
+    e.preventDefault();
+    if (adminPassword === 'ezonix@2026') {
+      sessionStorage.setItem('adminUnlocked', 'true');
+      setShowAdminPassModal(false);
+      setAdminPassword('');
+      setShowPasswordText(false);
+      toast.success('Admin Panel unlocked successfully!');
+      navigate('/app/admin');
+    } else {
+      toast.error('Incorrect admin password.');
+    }
+  };
 
   const menuItems = [
     { name: 'Dashboard', path: '/app', icon: LayoutDashboard },
@@ -43,10 +86,6 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Communication', path: '/app/communication', icon: MessageSquare },
   ];
 
-  if (user?.role === 'admin') {
-    menuItems.push({ name: 'Admin Panel', path: '/app/admin', icon: Shield });
-  }
-
   menuItems.push({ name: 'Settings', path: '/app/settings', icon: Settings });
 
   const sidebarContent = (
@@ -57,7 +96,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           <img
             src="/logo.png"
             alt="Logo"
-            className="h-8 w-8 rounded-lg object-contain"
+            onClick={handleLogoClick}
+            className="h-8 w-8 rounded-lg object-contain bg-slate-900 dark:bg-slate-800/50 p-1 cursor-pointer hover:scale-105 active:scale-95 transition-all"
           />
           {(!collapsed || isOpen) && (
             <motion.span
@@ -93,7 +133,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   `flex items-center rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? 'bg-blue-500/10 text-primary dark:bg-blue-950/40'
-                      : 'text-slate-550 dark:text-slate-400 hover:bg-slate-50 hover:text-slate-800 dark:hover:bg-slate-800/40 dark:hover:text-slate-250'
+                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 hover:text-slate-800 dark:hover:bg-slate-800/40 dark:hover:text-slate-250'
                   } ${collapsed && !isOpen ? 'justify-center' : 'gap-3'}`
                 }
               >
@@ -162,6 +202,55 @@ const Sidebar = ({ isOpen, onClose }) => {
       >
         {sidebarContent}
       </aside>
+      <Modal 
+        isOpen={showAdminPassModal} 
+        onClose={() => { setShowAdminPassModal(false); setAdminPassword(''); setShowPasswordText(false); }} 
+        title="Admin Panel Authentication"
+      >
+        <form onSubmit={handleAdminPassSubmit} className="space-y-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Please enter the system administrator security key to unlock the Admin Panel.
+          </p>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-2">
+              Security Key
+            </label>
+            <div className="relative">
+              <input
+                type={showPasswordText ? "text" : "password"}
+                placeholder="••••••••"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="form-input pr-10"
+                autoFocus
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswordText(!showPasswordText)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none"
+              >
+                {showPasswordText ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => { setShowAdminPassModal(false); setAdminPassword(''); setShowPasswordText(false); }}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition-colors"
+            >
+              Verify & Enter
+            </button>
+          </div>
+        </form>
+      </Modal>
     </>
   );
 };

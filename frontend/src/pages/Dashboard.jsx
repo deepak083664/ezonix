@@ -79,7 +79,7 @@ const Dashboard = () => {
   // App Launcher Grid Items matching user request
   const launcherItems = [
     { name: 'Products', path: '/products', icon: Package, color: 'from-purple-500 to-pink-600', shadow: 'shadow-purple-500/10' },
-    { name: 'Invoices (Orders)', path: '/invoices', icon: FileText, color: 'from-emerald-450 to-teal-650', shadow: 'shadow-emerald-500/10' },
+    { name: 'Invoices (Orders)', path: '/invoices', icon: FileText, color: 'from-rose-500 to-red-600', shadow: 'shadow-rose-500/10' },
     { name: 'Customers', path: '/customers', icon: Users, color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/10' },
     { name: 'Payments', path: '/payments', icon: CreditCard, color: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/10' },
     { name: 'Purchases', path: '/purchases', icon: ShoppingBag, color: 'from-cyan-500 to-blue-600', shadow: 'shadow-cyan-500/10' },
@@ -114,8 +114,8 @@ const Dashboard = () => {
       title: 'Orders',
       value: stats?.notifications?.pendingPaymentsAlerts?.length || 0, // Pending invoices count as active orders
       icon: FileText,
-      color: '#f59e0b',
-      bgColor: 'bg-amber-500/10 text-amber-500',
+      color: '#ef4444',
+      bgColor: 'bg-red-500/10 text-red-500',
       dataKey: 'expenses',
       desc: 'Pending invoice actions'
     },
@@ -224,7 +224,7 @@ const Dashboard = () => {
 
           {pendingPaymentsCount > 0 && (
             <div className="flex items-start gap-3 rounded-2xl border border-yellow-200/80 bg-yellow-50 p-4 dark:border-yellow-950/20 dark:bg-yellow-950/10 text-yellow-800 dark:text-yellow-400">
-              <AlertTriangle className="shrink-0 text-yellow-550" size={16} />
+              <AlertTriangle className="shrink-0 text-yellow-500" size={16} />
               <div className="text-[11px] font-semibold">
                 <span className="font-black text-yellow-650">Outstanding payments:</span> {pendingPaymentsCount} collections waiting.{' '}
                 <Link to="/payments" className="font-bold underline text-yellow-700 dark:text-yellow-400">

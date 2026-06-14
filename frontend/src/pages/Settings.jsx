@@ -111,7 +111,7 @@ const Settings = () => {
       >
         {/* Business branding row */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center border-b border-slate-100 pb-6 dark:border-slate-800">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-900 dark:bg-slate-800/50 p-2">
             {logoPreview ? (
               <img src={logoPreview} alt="Logo" className="h-full w-full object-contain" />
             ) : (

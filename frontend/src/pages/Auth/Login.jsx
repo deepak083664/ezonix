@@ -13,9 +13,14 @@ const Login = () => {
   const handleGoogleCallback = async (response) => {
     setLoading(true);
     try {
-      await loginWithGoogle(response.credential);
+      const data = await loginWithGoogle(response.credential);
       toast.success('Successfully logged in with Google!');
-      navigate('/app');
+      if (data?.data?.user?.role === 'admin') {
+        sessionStorage.setItem('adminUnlocked', 'true');
+        navigate('/app/admin');
+      } else {
+        navigate('/app');
+      }
     } catch (err) {
       toast.error(err.message || 'Google authentication failed.');
     } finally {
@@ -52,9 +57,14 @@ const Login = () => {
   const handleDevBypass = async () => {
     setLoading(true);
     try {
-      await loginWithGoogle('dev-bypass-admin');
+      const data = await loginWithGoogle('dev-bypass-admin');
       toast.success('Development bypass authentication successful!');
-      navigate('/app');
+      if (data?.data?.user?.role === 'admin') {
+        sessionStorage.setItem('adminUnlocked', 'true');
+        navigate('/app/admin');
+      } else {
+        navigate('/app');
+      }
     } catch (err) {
       toast.error('Bypass authentication failed');
     } finally {
@@ -71,12 +81,12 @@ const Login = () => {
           <img
             src="/logo.png"
             alt="Logo"
-            className="h-16 w-16 rounded-xl object-contain shadow-md"
+            className="h-16 w-16 rounded-xl object-contain bg-slate-900 dark:bg-slate-800/50 p-2 shadow-md"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">
             EZO<span className="text-primary">INX</span>
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-550 dark:text-slate-400">
+          <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
             Sign in to manage your business dashboard
           </p>
         </div>

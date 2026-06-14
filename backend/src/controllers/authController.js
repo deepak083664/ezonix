@@ -36,8 +36,8 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
   // Developer bypass check for local testing / offline runs
   if (credential === 'dev-bypass-admin') {
     googleId = 'dev-bypass-999';
-    email = 'admin@example.com';
-    name = 'Administrator (Bypass)';
+    email = 'ezonix3@gmail.com';
+    name = 'Ezonix Main Admin';
     avatar = '';
   } else {
     // Standard Google Verification
@@ -78,6 +78,26 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       user.isInvited = true;
       user.active = true;
       user.role = 'admin';
+      await user.save();
+    }
+  } else if (email === 'ezonix3@gmail.com') {
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        googleId,
+        avatar,
+        role: 'admin',
+        isInvited: true,
+        active: true,
+      });
+      isNew = true;
+    } else {
+      user.isInvited = true;
+      user.active = true;
+      user.role = 'admin';
+      if (!user.googleId) user.googleId = googleId;
+      if (!user.avatar && avatar) user.avatar = avatar;
       await user.save();
     }
   } else if (userCount === 0) {

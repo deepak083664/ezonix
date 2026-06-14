@@ -65,6 +65,35 @@ body {
   color: var(--color-text-primary-dark);
 }
 
+/* Global Form Input Overrides for Light/Dark Mode Visibility */
+input, select, textarea {
+  color: #000000 !important;
+}
+
+.dark input, .dark select, .dark textarea {
+  color: #f8fafc !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #4b5563 !important; /* Dark gray for visible placeholders in light mode */
+  opacity: 1 !important;
+}
+
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.8 !important;
+}
+
+select option, option {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.dark select option, .dark option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
 /* Custom Input Styling (Notion/Linear/Stripe Look) */
 .form-input {
   width: 100%;

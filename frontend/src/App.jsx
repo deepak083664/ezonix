@@ -72,7 +72,14 @@ const ProtectedLayout = () => {
             <Route path="/settings" element={<Settings />} />
             
             {/* SaaS Admin Panel */}
-            <Route path="/admin" element={user?.role === 'admin' ? <AdminDashboard /> : <Navigate to="/app" replace />} />
+            <Route 
+              path="/admin" 
+              element={
+                user?.role === 'admin' && sessionStorage.getItem('adminUnlocked') === 'true'
+                  ? <AdminDashboard /> 
+                  : <Navigate to="/app" replace />
+              } 
+            />
             
             {/* New mock SaaS page paths */}
             <Route path="/leads" element={<Leads />} />

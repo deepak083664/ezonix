@@ -1,15 +1,55 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Sun, Moon, LogOut, User as UserIcon, Building2, Search, Menu, X, Users, Package, FileText, Bell, Plus, Settings, ChevronDown, Check } from 'lucide-react';
+import { Sun, Moon, LogOut, User as UserIcon, Building2, Search, Menu, X, Users, Package, FileText, Bell, Plus, Settings, ChevronDown, Check, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import API, { BACKEND_URL } from '../services/api';
+import Modal from './Modal';
+import toast from 'react-hot-toast';
 
 const Navbar = ({ onMobileToggle }) => {
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const navigate = useNavigate();
+  
+  const [logoClicks, setLogoClicks] = useState(0);
+  const [showAdminPassModal, setShowAdminPassModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showPasswordText, setShowPasswordText] = useState(false);
+
+  const handleLogoClick = () => {
+    if (user?.role !== 'admin') {
+      toast.error('Only administrators can access the Admin Panel.');
+      return;
+    }
+    setLogoClicks((prev) => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setShowAdminPassModal(true);
+        return 0;
+      }
+      return next;
+    });
+    // Reset click count after 3 seconds
+    setTimeout(() => {
+      setLogoClicks(0);
+    }, 3000);
+  };
+
+  const handleAdminPassSubmit = (e) => {
+    e.preventDefault();
+    if (adminPassword === 'ezonix@2026') {
+      sessionStorage.setItem('adminUnlocked', 'true');
+      setShowAdminPassModal(false);
+      setAdminPassword('');
+      setShowPasswordText(false);
+      toast.success('Admin Panel unlocked successfully!');
+      navigate('/app/admin');
+    } else {
+      toast.error('Incorrect admin password.');
+    }
+  };
   
   const [businessName, setBusinessName] = useState('ezoinx');
   const [logo, setLogo] = useState('');
@@ -144,10 +184,14 @@ const Navbar = ({ onMobileToggle }) => {
             <img
               src={logo.startsWith('http') ? logo : `${BACKEND_URL}${logo}`}
               alt="Logo"
-              className="h-8 w-8 rounded-lg object-contain"
+              onClick={handleLogoClick}
+              className="h-8 w-8 rounded-lg object-contain bg-slate-900 dark:bg-slate-800/50 p-1 cursor-pointer hover:scale-105 active:scale-95 transition-all"
             />
           ) : (
-            <div className="rounded-lg bg-blue-500/10 p-1.5 text-primary">
+            <div 
+              onClick={handleLogoClick}
+              className="rounded-lg bg-blue-500/10 p-1.5 text-primary cursor-pointer hover:bg-blue-500/20 transition-all animate-pulse-subtle"
+            >
               <Building2 size={16} />
             </div>
           )}
@@ -421,6 +465,55 @@ const Navbar = ({ onMobileToggle }) => {
         </div>
 
       </div>
+      <Modal 
+        isOpen={showAdminPassModal} 
+        onClose={() => { setShowAdminPassModal(false); setAdminPassword(''); setShowPasswordText(false); }} 
+        title="Admin Panel Authentication"
+      >
+        <form onSubmit={handleAdminPassSubmit} className="space-y-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Please enter the system administrator security key to unlock the Admin Panel.
+          </p>
+          <div>
+            <label className="block text-[10px] font-bold text-slate-455 uppercase tracking-wider mb-2">
+              Security Key
+            </label>
+            <div className="relative">
+              <input
+                type={showPasswordText ? "text" : "password"}
+                placeholder="••••••••"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                className="form-input pr-10"
+                autoFocus
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPasswordText(!showPasswordText)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none"
+              >
+                {showPasswordText ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => { setShowAdminPassModal(false); setAdminPassword(''); setShowPasswordText(false); }}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-bold text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 transition-colors"
+            >
+              Verify & Enter
+            </button>
+          </div>
+        </form>
+      </Modal>
     </header>
   );
 };

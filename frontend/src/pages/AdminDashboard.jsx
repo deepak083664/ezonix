@@ -250,7 +250,7 @@ const AdminDashboard = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white uppercase">
-            SaaS Admin Control Center
+            Ezonix Admin Panel
           </h1>
           <p className="text-xs text-slate-500">
             Regulate client subscriptions, user registration listings, website configurations, and track business analytics metrics.
