@@ -321,60 +321,74 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-750 dark:text-slate-300">
-                {users.map((u) => (
-                  <tr key={u._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20">
-                    <td className="py-3.5 px-4 font-semibold">
-                      <div className="font-bold text-slate-900 dark:text-white">{u.name}</div>
-                      <div className="text-[10px] text-slate-450">{u.email}</div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                        u.role === 'admin' 
-                          ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
-                          : u.role === 'manager'
-                          ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
-                          : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center gap-1 font-bold ${
-                        u.googleId ? 'text-green-500' : 'text-amber-500'
-                      }`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${u.googleId ? 'bg-green-500' : 'bg-amber-500'}`}></span>
-                        {u.googleId ? 'Registered' : 'Invited'}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <button 
-                        onClick={() => handleToggleUserActive(u)}
-                        className={`inline-flex items-center gap-1 p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer font-bold ${
-                          u.active ? 'text-green-500' : 'text-slate-400'
-                        }`}
-                      >
-                        {u.active ? <UserCheck size={16} /> : <UserX size={16} />}
-                        {u.active ? 'Active' : 'Deactivated'}
-                      </button>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex justify-end gap-2">
+                {users.map((u) => {
+                  const isPermanentAdmin = ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(u.email);
+                  return (
+                    <tr key={u._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20">
+                      <td className="py-3.5 px-4 font-semibold">
+                        <div className="font-bold text-slate-900 dark:text-white">{u.name}</div>
+                        <div className="text-[10px] text-slate-450">{u.email}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          isPermanentAdmin
+                            ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20'
+                            : u.role === 'admin' 
+                            ? 'bg-red-500/10 text-red-500 border border-red-500/20' 
+                            : u.role === 'manager'
+                            ? 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20'
+                            : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+                        }`}>
+                          {isPermanentAdmin ? 'Permanent Admin' : u.role}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className={`inline-flex items-center gap-1 font-bold ${
+                          u.googleId ? 'text-green-500' : 'text-amber-500'
+                        }`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${u.googleId ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+                          {u.googleId ? 'Registered' : 'Invited'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
                         <button 
-                          onClick={() => openEditUser(u)}
-                          className="p-1 text-slate-400 hover:text-primary cursor-pointer"
+                          onClick={() => !isPermanentAdmin && handleToggleUserActive(u)}
+                          disabled={isPermanentAdmin}
+                          className={`inline-flex items-center gap-1 p-1 rounded-lg transition-all font-bold ${
+                            isPermanentAdmin
+                              ? 'text-green-500 opacity-60 cursor-not-allowed'
+                              : u.active 
+                              ? 'text-green-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer' 
+                              : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer'
+                          }`}
                         >
-                          <Edit size={14} />
+                          {u.active ? <UserCheck size={16} /> : <UserX size={16} />}
+                          {u.active ? 'Active' : 'Deactivated'}
                         </button>
-                        <button 
-                          onClick={() => handleDeleteUser(u._id)}
-                          className="p-1 text-slate-400 hover:text-red-500 cursor-pointer"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex justify-end gap-2">
+                          <button 
+                            onClick={() => openEditUser(u)}
+                            className="p-1 text-slate-400 hover:text-primary cursor-pointer"
+                            title="Edit User"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          {!isPermanentAdmin && (
+                            <button 
+                              onClick={() => handleDeleteUser(u._id)}
+                              className="p-1 text-slate-400 hover:text-red-500 cursor-pointer"
+                              title="Delete User"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -812,13 +826,21 @@ const AdminDashboard = () => {
                 <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Security Access Role</label>
                 <select
                   value={userForm.role}
+                  disabled={['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email)}
                   onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                  className={`w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none ${
+                    ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email) ? 'opacity-65 cursor-not-allowed' : ''
+                  }`}
                 >
                   <option value="staff">Staff</option>
                   <option value="manager">Manager</option>
                   <option value="admin">Administrator</option>
                 </select>
+                {['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email) && (
+                  <p className="text-[9px] text-purple-400 mt-1 font-semibold">
+                    * This is a permanent administrator account. The security role is locked.
+                  </p>
+                )}
               </div>
 
               {!userForm.id && (

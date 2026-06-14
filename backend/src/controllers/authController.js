@@ -80,7 +80,7 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       user.role = 'admin';
       await user.save();
     }
-  } else if (email === 'ezonix3@gmail.com') {
+  } else if (['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(email)) {
     if (!user) {
       user = await User.create({
         name,

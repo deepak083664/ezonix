@@ -63,6 +63,11 @@ exports.createUser = catchAsync(async (req, res, next) => {
 });
 
 exports.updateUser = catchAsync(async (req, res, next) => {
+  const userToUpdate = await User.findById(req.params.id);
+  if (!userToUpdate) {
+    return next(new AppError('No user found with that ID', 404));
+  }
+
   // Prevent admin from deactivating or demoting themselves
   if (req.user._id.toString() === req.params.id) {
     if (req.body.active === false || (req.body.role && req.body.role !== 'admin')) {
@@ -70,14 +75,21 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     }
   }
 
+  // Prevent demoting or deactivating permanent admins
+  const permanentAdmins = ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'];
+  if (permanentAdmins.includes(userToUpdate.email)) {
+    if (req.body.active === false || (req.body.role && req.body.role !== 'admin')) {
+      return next(new AppError('This is a permanent administrator account and cannot be demoted or deactivated.', 400));
+    }
+    if (req.body.email && req.body.email !== userToUpdate.email) {
+      return next(new AppError('The email of a permanent administrator account cannot be changed.', 400));
+    }
+  }
+
   const user = await User.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
-
-  if (!user) {
-    return next(new AppError('No user found with that ID', 404));
-  }
 
   res.status(200).json({
     status: 'success',
@@ -93,11 +105,18 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
     return next(new AppError('You cannot delete your own administrator account.', 400));
   }
 
-  const user = await User.findByIdAndDelete(req.params.id);
-
-  if (!user) {
+  const userToDelete = await User.findById(req.params.id);
+  if (!userToDelete) {
     return next(new AppError('No user found with that ID', 404));
   }
+
+  // Prevent deleting permanent admins
+  const permanentAdmins = ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'];
+  if (permanentAdmins.includes(userToDelete.email)) {
+    return next(new AppError('You cannot delete a permanent administrator account.', 400));
+  }
+
+  await User.findByIdAndDelete(req.params.id);
 
   // Delete associated subscriptions
   await Subscription.deleteMany({ userId: req.params.id });
