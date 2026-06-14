@@ -13,7 +13,7 @@ const generateInvoicePDF = (invoice, setting, res) => {
   const lightBg = '#F8FAFC'; // Light Gray
 
   // --- HEADER SECTION ---
-  doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezoinx', 50, 45, { align: 'left' });
+  doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
   
   doc.fontSize(9).fillColor(textColor);
   if (setting.address) doc.text(setting.address, 50, 75);

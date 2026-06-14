@@ -71,7 +71,7 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
 
   let setting = await Setting.findOne();
   if (!setting) {
-    setting = await Setting.create({ businessName: 'ezoinx' });
+    setting = await Setting.create({ businessName: 'ezonix' });
   }
 
   const count = await Invoice.countDocuments();
@@ -225,7 +225,7 @@ exports.downloadInvoicePDF = catchAsync(async (req, res, next) => {
 
   let setting = await Setting.findOne();
   if (!setting) {
-    setting = { businessName: 'ezoinx' };
+    setting = { businessName: 'ezonix' };
   }
 
   res.setHeader('Content-Type', 'application/pdf');

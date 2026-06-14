@@ -9,10 +9,14 @@ exports.getSettings = catchAsync(async (req, res, next) => {
   // If no settings exist yet, create a default one
   if (!setting) {
     setting = await Setting.create({
-      businessName: 'ezoinx',
+      businessName: 'ezonix',
       invoicePrefix: 'INV',
       defaultTaxRate: 18,
     });
+  } else if (setting.businessName === 'ezoinx') {
+    // Automatically migrate old businessName spelling
+    setting.businessName = 'ezonix';
+    await setting.save();
   }
 
   res.status(200).json({
@@ -28,7 +32,7 @@ exports.updateSettings = catchAsync(async (req, res, next) => {
 
   if (!setting) {
     setting = await Setting.create({
-      businessName: 'ezoinx',
+      businessName: 'ezonix',
       invoicePrefix: 'INV',
       defaultTaxRate: 18,
     });

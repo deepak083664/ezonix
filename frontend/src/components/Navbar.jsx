@@ -51,7 +51,7 @@ const Navbar = ({ onMobileToggle }) => {
     }
   };
   
-  const [businessName, setBusinessName] = useState('ezoinx');
+  const [businessName, setBusinessName] = useState('ezonix');
   const [logo, setLogo] = useState('');
 
   // Global search states
@@ -77,7 +77,7 @@ const Navbar = ({ onMobileToggle }) => {
       try {
         const res = await API.get('/settings');
         if (res.data.data.setting) {
-          setBusinessName(res.data.data.setting.businessName || 'ezoinx');
+          setBusinessName(res.data.data.setting.businessName || 'ezonix');
           setLogo(res.data.data.setting.logoUrl || '');
         }
       } catch (err) {

@@ -169,7 +169,7 @@ const Dashboard = () => {
             Hi, {user?.name || 'Partner'}!
           </h1>
           <p className="text-[11px] font-semibold text-slate-400">
-            EZOINX Premium Business Hub
+            EZONIX Premium Business Hub
           </p>
         </div>
         <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-500/10 text-primary">

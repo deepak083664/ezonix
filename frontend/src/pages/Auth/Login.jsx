@@ -64,7 +64,7 @@ const Login = () => {
             className="h-16 w-16 rounded-xl object-contain bg-slate-900 dark:bg-slate-800/50 p-2 shadow-md"
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase">
-            EZO<span className="text-primary">INX</span>
+            EZO<span className="text-primary">NIX</span>
           </h2>
           <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
             Sign in to manage your business dashboard
@@ -79,7 +79,7 @@ const Login = () => {
         {/* Footer info warning */}
         <div className="rounded-lg bg-blue-50/50 border border-blue-100 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
           <p className="text-[11px] text-blue-800 dark:text-blue-400 leading-relaxed text-center">
-            <b>ezoinx</b> uses secure token sessions. Google logins automatically authorize and create database profiles.
+            <b>ezonix</b> uses secure token sessions. Google logins automatically authorize and create database profiles.
           </p>
         </div>
       </div>
