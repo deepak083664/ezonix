@@ -1,4 +1,5 @@
 const AppError = require('../utils/appError');
+const logger = require('../utils/logger');
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}.`;
@@ -42,7 +43,7 @@ const sendErrorProd = (err, req, res) => {
   }
 
   // Programming or other unknown error: don't leak error details
-  console.error('ERROR 💥', err);
+  logger.error('ERROR 💥', err);
   return res.status(500).json({
     status: 'error',
     message: 'Something went very wrong!',

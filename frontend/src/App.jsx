@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, NavLink } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -10,28 +10,28 @@ import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import CommandPalette from './components/CommandPalette';
 
-// Page components
-import Login from './pages/Auth/Login';
-import Dashboard from './pages/Dashboard';
-import Customers from './pages/Customers';
-import Products from './pages/Products';
-import Invoices from './pages/Invoices';
-import Purchases from './pages/Purchases';
-import Expenses from './pages/Expenses';
-import Payments from './pages/Payments';
-import Incomes from './pages/Incomes';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
+// Page components (Lazy Loaded)
+const Login = React.lazy(() => import('./pages/Auth/Login'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Customers = React.lazy(() => import('./pages/Customers'));
+const Products = React.lazy(() => import('./pages/Products'));
+const Invoices = React.lazy(() => import('./pages/Invoices'));
+const Purchases = React.lazy(() => import('./pages/Purchases'));
+const Expenses = React.lazy(() => import('./pages/Expenses'));
+const Payments = React.lazy(() => import('./pages/Payments'));
+const Incomes = React.lazy(() => import('./pages/Incomes'));
+const Reports = React.lazy(() => import('./pages/Reports'));
+const Settings = React.lazy(() => import('./pages/Settings'));
 
-// New SaaS views
-import LandingPage from './pages/LandingPage';
-import AdminDashboard from './pages/AdminDashboard';
+// New SaaS views (Lazy Loaded)
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 
-// New Mock SaaS views
-import Leads from './pages/Leads';
-import Tasks from './pages/Tasks';
-import Documents from './pages/Documents';
-import Communication from './pages/Communication';
+// New Mock SaaS views (Lazy Loaded)
+const Leads = React.lazy(() => import('./pages/Leads'));
+const Tasks = React.lazy(() => import('./pages/Tasks'));
+const Documents = React.lazy(() => import('./pages/Documents'));
+const Communication = React.lazy(() => import('./pages/Communication'));
 
 // Protected Route Wrapper Component
 const ProtectedLayout = () => {
@@ -59,36 +59,42 @@ const ProtectedLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar onMobileToggle={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8 pb-20 lg:pb-8">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/purchases" element={<Purchases />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/payments" element={<Payments />} />
-            <Route path="/incomes" element={<Incomes />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-            
-            {/* SaaS Admin Panel */}
-            <Route 
-              path="/admin" 
-              element={
-                user?.role === 'admin' && sessionStorage.getItem('adminUnlocked') === 'true'
-                  ? <AdminDashboard /> 
-                  : <Navigate to="/app" replace />
-              } 
-            />
-            
-            {/* New mock SaaS page paths */}
-            <Route path="/leads" element={<Leads />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route path="/communication" element={<Communication />} />
+          <Suspense fallback={
+            <div className="flex h-full w-full min-h-[50vh] items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            </div>
+          }>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/invoices" element={<Invoices />} />
+              <Route path="/purchases" element={<Purchases />} />
+              <Route path="/expenses" element={<Expenses />} />
+              <Route path="/payments" element={<Payments />} />
+              <Route path="/incomes" element={<Incomes />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              
+              {/* SaaS Admin Panel */}
+              <Route 
+                path="/admin" 
+                element={
+                  user?.role === 'admin' && sessionStorage.getItem('adminUnlocked') === 'true'
+                    ? <AdminDashboard /> 
+                    : <Navigate to="/app" replace />
+                } 
+              />
+              
+              {/* New mock SaaS page paths */}
+              <Route path="/leads" element={<Leads />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/documents" element={<Documents />} />
+              <Route path="/communication" element={<Communication />} />
 
-            <Route path="*" element={<Navigate to="/app" replace />} />
-          </Routes>
+              <Route path="*" element={<Navigate to="/app" replace />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
 
@@ -160,19 +166,25 @@ const App = () => {
       <AuthProvider>
         <Router>
           <CommandPalette />
-          <Routes>
-            {/* Public Landing Page */}
-            <Route path="/" element={<LandingPage />} />
-            
-            {/* Public Auth Routes */}
-            <Route path="/login" element={<Login />} />
+          <Suspense fallback={
+            <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            </div>
+          }>
+            <Routes>
+              {/* Public Landing Page */}
+              <Route path="/" element={<LandingPage />} />
+              
+              {/* Public Auth Routes */}
+              <Route path="/login" element={<Login />} />
 
-            {/* Protected CRM Dashboard Layout */}
-            <Route path="/app/*" element={<ProtectedLayout />} />
+              {/* Protected CRM Dashboard Layout */}
+              <Route path="/app/*" element={<ProtectedLayout />} />
 
-            {/* Catch-all redirect to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Catch-all redirect to home */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
           <Toaster
             position="top-right"
             toastOptions={{

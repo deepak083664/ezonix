@@ -1,5 +1,6 @@
 const Plan = require('../models/Plan');
 const WebsiteContent = require('../models/WebsiteContent');
+const logger = require('./logger');
 
 const seedPlans = async () => {
   const count = await Plan.countDocuments();
@@ -36,7 +37,7 @@ const seedPlans = async () => {
   ];
 
   await Plan.create(defaultPlans);
-  console.log('🌱 Default subscription plans seeded successfully.');
+  logger.info('Default subscription plans seeded successfully.');
 };
 
 const seedWebsiteContent = async () => {
@@ -164,7 +165,7 @@ const seedWebsiteContent = async () => {
       { upsert: true, new: true }
     );
   }
-  console.log('🌱 Default landing page CMS blocks seeded and synced successfully.');
+  logger.info('Default landing page CMS blocks seeded and synced successfully.');
 };
 
 const runSeeder = async () => {
@@ -172,7 +173,7 @@ const runSeeder = async () => {
     await seedPlans();
     await seedWebsiteContent();
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    logger.error('Error seeding database:', error);
   }
 };
 

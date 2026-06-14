@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./middleware/errorMiddleware');
@@ -94,6 +95,20 @@ app.use(mongoSanitize());
 
 // Serve uploads static directory for local file fallback
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
+// Serve frontend static assets in production or fallback
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  
+  // Wildcard SPA route fallback (non-API/non-uploads routes serve index.html)
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+}
 
 // 2) ROUTES
 app.use('/api/v1/auth', authRouter);

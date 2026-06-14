@@ -88,6 +88,7 @@ const invoiceSchema = new mongoose.Schema(
 );
 
 invoiceSchema.index({ invoiceNumber: 'text' });
+invoiceSchema.index({ customer: 1, status: 1 });
 
 const Invoice = mongoose.model('Invoice', invoiceSchema);
 

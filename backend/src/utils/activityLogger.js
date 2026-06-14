@@ -1,4 +1,5 @@
 const ActivityLog = require('../models/ActivityLog');
+const logger = require('./logger');
 
 const logActivity = async (action, description, req = null) => {
   try {
@@ -14,7 +15,7 @@ const logActivity = async (action, description, req = null) => {
     }
     await ActivityLog.create(logData);
   } catch (err) {
-    console.error('Failed to write activity log:', err);
+    logger.error('Failed to write activity log:', err);
   }
 };
 

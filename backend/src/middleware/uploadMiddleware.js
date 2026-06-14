@@ -2,6 +2,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
+const logger = require('../utils/logger');
 
 let isCloudinary = false;
 let uploadMemory;
@@ -129,7 +130,7 @@ const deleteFile = async (urlOrPath, publicId = '') => {
       }
     }
   } catch (err) {
-    console.error('Error deleting file: ', err);
+    logger.error('Error deleting file: ', err);
   }
 };
 

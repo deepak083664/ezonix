@@ -13,11 +13,7 @@ import {
   ArrowRight, 
   Menu, 
   X, 
-  ChevronDown, 
-  ChevronUp, 
   Mail, 
-  Phone, 
-  MapPin, 
   Check, 
   Loader2,
   Lock,
@@ -44,7 +40,6 @@ const LandingPage = () => {
   const [plans, setPlans] = useState([]);
   const [cmsContent, setCmsContent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [faqOpen, setFaqOpen] = useState({});
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
   const [submittingContact, setSubmittingContact] = useState(false);
   const [contactSuccess, setContactSuccess] = useState(false);
@@ -77,10 +72,6 @@ const LandingPage = () => {
       setContactSuccess(true);
       setContactForm({ name: '', email: '', message: '' });
     }, 1200);
-  };
-
-  const toggleFaq = (index) => {
-    setFaqOpen((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
   // Fallback contents if API is loading or empty
@@ -116,12 +107,6 @@ const LandingPage = () => {
     { name: 'David Chen', role: 'Founder', company: 'Vertex Digital', quote: 'The invite-only Google authentication is exactly the level of security we wanted. The dashboard gives me a real-time HUD of outstanding invoices and cash flow.' }
   ];
 
-  const faqList = cmsContent?.faq || [
-    { question: 'How do I invite team members to Ezonix?', answer: 'As an administrator, you can navigate to the SaaS Admin Console, go to the Users tab, and enter the email address and assign a role (Admin, Manager, Staff). Once added, they can securely log in using their Google account.' },
-    { question: 'What happens when a subscription expires?', answer: 'When a subscription passes its expiry date or status is changed to expired/cancelled, non-admin users will see an access blocked screen. Admin users will retain access to renew subscriptions.' },
-    { question: 'Does Ezonix support local file storage?', answer: 'Yes! While Cloudinary integration is supported for production cloud storage, Ezonix automatically falls back to secure local storage under the public/uploads directory if cloud keys are not configured.' }
-  ];
-
   const contactDetails = cmsContent?.contact || {
     email: 'ezonix3@gmail.com',
     phone: '+1 (555) 019-2834',
@@ -152,7 +137,6 @@ const LandingPage = () => {
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
             <a href="#features" className="hover:text-blue-400 transition-colors">Features</a>
             <a href="#pricing" className="hover:text-blue-400 transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-blue-400 transition-colors">FAQs</a>
             <a href="#contact" className="hover:text-blue-400 transition-colors">Contact</a>
           </nav>
 
@@ -186,7 +170,6 @@ const LandingPage = () => {
           >
             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Features</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Pricing</a>
-            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">FAQs</a>
             <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Contact</a>
             <hr className="border-slate-800" />
             <Link 
@@ -222,13 +205,13 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link 
                   to={hero.ctaLink} 
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 py-2.5 px-5 sm:py-3.5 sm:px-8 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 transition-all"
+                  className="w-56 sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 py-2.5 px-5 sm:py-3.5 sm:px-8 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 transition-all"
                 >
                   {hero.ctaText} <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Link>
                 <a 
                   href={hero.secondaryCtaLink} 
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-slate-700 hover:bg-slate-800 py-2.5 px-5 sm:py-3.5 sm:px-8 text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all"
+                  className="w-56 sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-slate-700 hover:bg-slate-800 py-2.5 px-5 sm:py-3.5 sm:px-8 text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all"
                 >
                   {hero.secondaryCtaText}
                 </a>
@@ -400,47 +383,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="py-12 sm:py-20 lg:py-32">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">Frequently Asked Questions</h2>
-            <p className="text-slate-400 font-light text-xs sm:text-sm">Have questions? We've got answers.</p>
-          </div>
-
-          <div className="space-y-4">
-            {faqList.map((item, idx) => (
-              <div 
-                key={idx}
-                className="border border-slate-850 rounded-xl bg-slate-900/40 overflow-hidden transition-colors duration-200"
-              >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full flex items-center justify-between text-left p-4 sm:p-6 font-bold text-sm sm:text-base text-white hover:text-blue-400 focus:outline-none"
-                >
-                  <span>{item.question}</span>
-                  {faqOpen[idx] ? <ChevronUp size={18} className="text-blue-500" /> : <ChevronDown size={18} />}
-                </button>
-                <AnimatePresence>
-                  {faqOpen[idx] && (
-                    <motion.div
-                      initial={{ height: 0 }}
-                      animate={{ height: 'auto' }}
-                      exit={{ height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <p className="px-4 pb-4 sm:px-6 sm:pb-6 text-xs sm:text-sm text-slate-400 leading-relaxed font-light">
-                        {item.answer}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Contact Form Section */}
       <section id="contact" className="py-12 sm:py-20 lg:py-32 bg-slate-950 border-t border-slate-850">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -459,18 +401,6 @@ const LandingPage = () => {
                     <Mail size={18} />
                   </div>
                   <span className="text-sm font-light">{contactDetails.email}</span>
-                </div>
-                <div className="flex items-center gap-4 text-slate-300">
-                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
-                    <Phone size={18} />
-                  </div>
-                  <span className="text-sm font-light">{contactDetails.phone}</span>
-                </div>
-                <div className="flex items-center gap-4 text-slate-300">
-                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
-                    <MapPin size={18} />
-                  </div>
-                  <span className="text-sm font-light leading-relaxed">{contactDetails.address}</span>
                 </div>
               </div>
             </div>
@@ -543,9 +473,22 @@ const LandingPage = () => {
               EZO<span className="text-blue-500">INX</span>
             </span>
           </div>
-          <p className="font-light">
-            &copy; {new Date().getFullYear()} {branding.siteName} CRM Platform. All rights reserved.
-          </p>
+          <div className="flex flex-col items-center gap-1">
+            <p className="font-light">
+              &copy; {new Date().getFullYear()} {branding.siteName} CRM Platform. All rights reserved.
+            </p>
+            <p className="text-[11px] text-slate-500 font-light flex items-center justify-center gap-1">
+              Designed and developed by
+              <a 
+                href="https://launchliftx.com" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-sm font-bold text-blue-400 hover:text-blue-300 hover:underline transition-colors ml-1"
+              >
+                launchliftx
+              </a>
+            </p>
+          </div>
           <div className="flex gap-6">
             <a href="#" className="hover:text-slate-350 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-slate-350 transition-colors">Terms of Service</a>
