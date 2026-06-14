@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { ShieldAlert, LogIn, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Login = () => {
@@ -53,25 +52,6 @@ const Login = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Developer Bypass Login Handler
-  const handleDevBypass = async () => {
-    setLoading(true);
-    try {
-      const data = await loginWithGoogle('dev-bypass-admin');
-      toast.success('Development bypass authentication successful!');
-      if (data?.data?.user?.role === 'admin') {
-        sessionStorage.setItem('adminUnlocked', 'true');
-        navigate('/app/admin');
-      } else {
-        navigate('/app');
-      }
-    } catch (err) {
-      toast.error('Bypass authentication failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 dark:bg-slate-950 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8 rounded-2xl border border-slate-100 bg-white p-8 shadow-xl dark:border-slate-800 dark:bg-slate-900">
@@ -94,26 +74,6 @@ const Login = () => {
         {/* Action Panel */}
         <div className="mt-8 space-y-4">
           <div className="w-full" id="googleSignInBtn"></div>
-
-          {/* Fallback bypass option */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-slate-200 dark:border-slate-800"></span>
-            </div>
-            <div className="relative flex justify-center text-xs uppercase font-semibold">
-              <span className="bg-white px-3 text-slate-400 dark:bg-slate-900">
-                Or Local Dev Mode
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleDevBypass}
-            disabled={loading}
-            className="flex w-full justify-center items-center gap-2 rounded-xl border border-slate-200 py-2.5 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-950 transition-all cursor-pointer"
-          >
-            <LogIn size={14} /> Continue as Tester
-          </button>
         </div>
 
         {/* Footer info warning */}
