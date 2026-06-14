@@ -4,8 +4,33 @@ const User = require('../models/User');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const logActivity = require('../utils/activityLogger');
+const logger = require('../utils/logger');
+const https = require('https');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const verifyGoogleTokenFallback = (credential) => {
+  return new Promise((resolve, reject) => {
+    const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`;
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(new Error('Invalid JSON response from Google tokeninfo API'));
+          }
+        } else {
+          reject(new Error(`Google tokeninfo API returned status ${res.statusCode}: ${data}`));
+        }
+      });
+    }).on('error', (err) => {
+      reject(err);
+    });
+  });
+};
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback-secret-key-123456', {
@@ -52,7 +77,32 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       name = payload.name;
       avatar = payload.picture;
     } catch (err) {
-      return next(new AppError('Invalid Google credential token or missing setup configs.', 400));
+      logger.error('Google verifyIdToken failed, attempting fallback verification via Google tokeninfo API...', err);
+      
+      try {
+        const payload = await verifyGoogleTokenFallback(credential);
+        
+        // Verify client ID / audience matches
+        const expectedClientId = process.env.GOOGLE_CLIENT_ID || '536012882296-158fbprbf62cvi6c9evin9thg93jrobo.apps.googleusercontent.com';
+        if (payload.aud !== expectedClientId) {
+          throw new Error(`Audience mismatch. Expected: ${expectedClientId}, Received: ${payload.aud}`);
+        }
+        
+        // Verify issuer
+        if (!['accounts.google.com', 'https://accounts.google.com'].includes(payload.iss)) {
+          throw new Error(`Invalid issuer: ${payload.iss}`);
+        }
+
+        googleId = payload.sub;
+        email = payload.email;
+        name = payload.name;
+        avatar = payload.picture;
+        
+        logger.info(`Google token verification succeeded via fallback tokeninfo API for: ${email}`);
+      } catch (fallbackErr) {
+        logger.error('Google fallback tokeninfo verification failed:', fallbackErr);
+        return next(new AppError(`Google authentication failed. (Internal error: ${err.message}. Fallback error: ${fallbackErr.message})`, 400));
+      }
     }
   }
 

@@ -83,10 +83,13 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: 'Tasks', path: '/app/tasks', icon: CheckSquare },
     { name: 'Reports', path: '/app/reports', icon: BarChart3 },
     { name: 'Documents', path: '/app/documents', icon: Folder },
-    { name: 'Communication', path: '/app/communication', icon: MessageSquare },
   ];
 
   menuItems.push({ name: 'Settings', path: '/app/settings', icon: Settings });
+
+  if (user?.role === 'admin' && sessionStorage.getItem('adminUnlocked') === 'true') {
+    menuItems.push({ name: 'Admin Panel', path: '/app/admin', icon: Shield });
+  }
 
   const sidebarContent = (
     <div className="flex h-full flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">

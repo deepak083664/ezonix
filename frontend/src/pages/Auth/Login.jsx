@@ -14,12 +14,7 @@ const Login = () => {
     try {
       const data = await loginWithGoogle(response.credential);
       toast.success('Successfully logged in with Google!');
-      if (data?.data?.user?.role === 'admin') {
-        sessionStorage.setItem('adminUnlocked', 'true');
-        navigate('/app/admin');
-      } else {
-        navigate('/app');
-      }
+      navigate('/app');
     } catch (err) {
       toast.error(err.message || 'Google authentication failed.');
     } finally {
@@ -29,27 +24,32 @@ const Login = () => {
 
   // Setup Google Identity Services Button
   useEffect(() => {
-    const initializeGoogle = () => {
+    let attempts = 0;
+    const intervalId = setInterval(() => {
       if (window.google?.accounts?.id) {
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '536012882296-158fbprbf62cvi6c9evin9thg93jrobo.apps.googleusercontent.com',
           callback: handleGoogleCallback,
         });
-        window.google.accounts.id.renderButton(
-          document.getElementById('googleSignInBtn'),
-          {
+        const btn = document.getElementById('googleSignInBtn');
+        if (btn) {
+          window.google.accounts.id.renderButton(btn, {
             theme: 'outline',
             size: 'large',
             text: 'continue_with',
             shape: 'rectangular',
             width: '100%',
-          }
-        );
+          });
+          clearInterval(intervalId);
+        }
       }
-    };
+      attempts++;
+      if (attempts > 50) { // Stop checking after 5 seconds (50 * 100ms)
+        clearInterval(intervalId);
+      }
+    }, 100);
 
-    const timer = setTimeout(initializeGoogle, 800);
-    return () => clearTimeout(timer);
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

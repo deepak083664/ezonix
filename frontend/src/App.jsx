@@ -31,7 +31,6 @@ const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 const Leads = React.lazy(() => import('./pages/Leads'));
 const Tasks = React.lazy(() => import('./pages/Tasks'));
 const Documents = React.lazy(() => import('./pages/Documents'));
-const Communication = React.lazy(() => import('./pages/Communication'));
 
 // Protected Route Wrapper Component
 const ProtectedLayout = () => {
@@ -90,7 +89,6 @@ const ProtectedLayout = () => {
               <Route path="/leads" element={<Leads />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/documents" element={<Documents />} />
-              <Route path="/communication" element={<Communication />} />
 
               <Route path="*" element={<Navigate to="/app" replace />} />
             </Routes>
@@ -142,18 +140,6 @@ const ProtectedLayout = () => {
         >
           <CheckSquare size={18} />
           <span className="text-[9px] font-bold mt-1">Tasks</span>
-        </NavLink>
-
-        <NavLink
-          to="/communication"
-          className={({ isActive }) =>
-            `flex flex-col items-center justify-center transition-colors ${
-              isActive ? 'text-primary' : 'text-slate-400 hover:text-slate-650 dark:hover:text-slate-200'
-            }`
-          }
-        >
-          <MessageSquare size={18} />
-          <span className="text-[9px] font-bold mt-1">Chat</span>
         </NavLink>
       </div>
     </div>

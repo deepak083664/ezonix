@@ -89,7 +89,6 @@ const Dashboard = () => {
     { name: 'Tasks', path: '/tasks', icon: CheckSquare, color: 'from-indigo-400 to-blue-500', shadow: 'shadow-indigo-500/10' },
     { name: 'Reports (Analytics)', path: '/reports', icon: BarChart3, color: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/10' },
     { name: 'Documents', path: '/documents', icon: Folder, color: 'from-sky-500 to-indigo-500', shadow: 'shadow-sky-500/10' },
-    { name: 'Communication', path: '/communication', icon: MessageSquare, color: 'from-pink-500 to-rose-500', shadow: 'shadow-pink-500/10' },
     { name: 'Settings', path: '/settings', icon: Settings, color: 'from-slate-500 to-slate-700', shadow: 'shadow-slate-500/10' },
   ];
 

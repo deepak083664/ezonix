@@ -13,7 +13,6 @@ const QUICK_LINKS = [
   { name: 'Leads', path: '/leads', icon: Flame, category: 'Sales' },
   { name: 'Tasks', path: '/tasks', icon: CheckSquare, category: 'Operations' },
   { name: 'Documents', path: '/documents', icon: Folder, category: 'Operations' },
-  { name: 'Communication', path: '/communication', icon: MessageSquare, category: 'Operations' },
   { name: 'Reports', path: '/reports', icon: BarChart3, category: 'Finance' },
   { name: 'Settings', path: '/settings', icon: Settings, category: 'System' },
 ];

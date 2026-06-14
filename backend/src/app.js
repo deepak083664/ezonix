@@ -64,8 +64,21 @@ const allowedOrigins = [
 ];
 
 if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
-  allowedOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ''));
+  const url = process.env.FRONTEND_URL.replace(/\/$/, '');
+  allowedOrigins.push(url);
+  
+  // Dynamically add root or www. variant to prevent CORS blocks for custom domains
+  if (url.startsWith('https://www.')) {
+    allowedOrigins.push(url.replace('https://www.', 'https://'));
+  } else if (url.startsWith('https://') && !url.startsWith('https://www.')) {
+    allowedOrigins.push(url.replace('https://', 'https://www.'));
+  }
+  
+  if (url.startsWith('http://www.')) {
+    allowedOrigins.push(url.replace('http://www.', 'http://'));
+  } else if (url.startsWith('http://') && !url.startsWith('http://www.')) {
+    allowedOrigins.push(url.replace('http://', 'http://www.'));
+  }
 }
 
 app.use(cors({
