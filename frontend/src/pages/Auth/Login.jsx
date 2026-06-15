@@ -4,9 +4,16 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const Login = () => {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/app');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   // Google Login Callback
   const handleGoogleCallback = async (response) => {

@@ -20,6 +20,7 @@ import {
   Package
 } from 'lucide-react';
 import API, { BACKEND_URL } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 // Map string names to Lucide Icon components
 const iconMap = {
@@ -35,6 +36,7 @@ const iconMap = {
 };
 
 const LandingPage = () => {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [plans, setPlans] = useState([]);
@@ -142,10 +144,10 @@ const LandingPage = () => {
 
           <div className="hidden md:flex items-center gap-4">
             <Link 
-              to="/login" 
+              to={isAuthenticated ? "/app" : "/login"} 
               className="flex items-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 py-2.5 px-6 text-sm font-bold text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all"
             >
-              <Lock size={14} /> CRM Portal Login
+              <Lock size={14} /> {isAuthenticated ? "Go to Dashboard" : "CRM Portal Login"}
             </Link>
           </div>
 
@@ -173,11 +175,11 @@ const LandingPage = () => {
             <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Contact</a>
             <hr className="border-slate-800" />
             <Link 
-              to="/login" 
+              to={isAuthenticated ? "/app" : "/login"} 
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 py-3 text-sm font-bold text-white shadow-lg"
             >
-              <Lock size={14} /> CRM Portal Login
+              <Lock size={14} /> {isAuthenticated ? "Go to Dashboard" : "CRM Portal Login"}
             </Link>
           </motion.div>
         )}
@@ -204,10 +206,10 @@ const LandingPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link 
-                  to={hero.ctaLink} 
+                  to={isAuthenticated ? "/app" : (hero.ctaLink === '/login' ? '/login' : hero.ctaLink)} 
                   className="w-56 sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 py-2.5 px-5 sm:py-3.5 sm:px-8 text-xs sm:text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/35 transition-all"
                 >
-                  {hero.ctaText} <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  {isAuthenticated ? "Go to CRM Panel" : hero.ctaText} <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Link>
                 <a 
                   href={hero.secondaryCtaLink} 
@@ -329,14 +331,14 @@ const LandingPage = () => {
                   </div>
 
                   <Link 
-                    to="/login"
+                    to={isAuthenticated ? "/app" : "/login"}
                     className={`w-full text-center font-bold text-[10px] sm:text-xs rounded-xl py-2.5 sm:py-3.5 transition-all ${
                       isPro 
                         ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg' 
                         : 'border border-slate-700 hover:border-slate-650 text-slate-300 hover:text-white'
                     }`}
                   >
-                    Select {plan.name}
+                    {isAuthenticated ? "Select & Continue" : `Select ${plan.name}`}
                   </Link>
                 </div>
               );
