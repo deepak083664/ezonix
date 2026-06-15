@@ -131,7 +131,7 @@ const LandingPage = () => {
           <Link to="/" className="flex items-center gap-3">
             <img src={branding.logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-contain bg-slate-800 p-1" />
             <span className="text-2xl font-black tracking-wider uppercase text-white">
-              EZO<span className="text-blue-500">INX</span>
+              EZO<span className="text-blue-500">NIX</span>
             </span>
           </Link>
 
@@ -472,7 +472,7 @@ const LandingPage = () => {
           <div className="flex items-center gap-3">
             <img src={branding.logoUrl} alt="Logo" className="h-6 w-6 object-contain bg-slate-900" />
             <span className="font-bold tracking-wider text-slate-400">
-              EZO<span className="text-blue-500">INX</span>
+              EZO<span className="text-blue-500">NIX</span>
             </span>
           </div>
           <div className="flex flex-col items-center gap-1">

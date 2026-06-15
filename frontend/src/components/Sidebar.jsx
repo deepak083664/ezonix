@@ -109,7 +109,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               exit={{ opacity: 0, x: -10 }}
               className="font-extrabold text-sm tracking-wider text-slate-800 dark:text-slate-100 uppercase"
             >
-              EZO<span className="text-primary">INX</span>
+              EZO<span className="text-primary">NIX</span>
             </motion.span>
           )}
         </div>
