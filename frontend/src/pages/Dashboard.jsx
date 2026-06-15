@@ -78,18 +78,18 @@ const Dashboard = () => {
 
   // App Launcher Grid Items matching user request
   const launcherItems = [
-    { name: 'Products', path: '/products', icon: Package, color: 'from-purple-500 to-pink-600', shadow: 'shadow-purple-500/10' },
-    { name: 'Invoices (Orders)', path: '/invoices', icon: FileText, color: 'from-rose-500 to-red-600', shadow: 'shadow-rose-500/10' },
-    { name: 'Customers', path: '/customers', icon: Users, color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/10' },
-    { name: 'Payments', path: '/payments', icon: CreditCard, color: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/10' },
-    { name: 'Purchases', path: '/purchases', icon: ShoppingBag, color: 'from-cyan-500 to-blue-600', shadow: 'shadow-cyan-500/10' },
-    { name: 'Expenses', path: '/expenses', icon: Receipt, color: 'from-rose-500 to-red-650', shadow: 'shadow-rose-500/10' },
-    { name: 'Incomes', path: '/incomes', icon: Coins, color: 'from-teal-400 to-emerald-500', shadow: 'shadow-teal-450/10' },
-    { name: 'Leads', path: '/leads', icon: Flame, color: 'from-orange-500 to-red-500', shadow: 'shadow-orange-500/10' },
-    { name: 'Tasks', path: '/tasks', icon: CheckSquare, color: 'from-indigo-400 to-blue-500', shadow: 'shadow-indigo-500/10' },
-    { name: 'Reports (Analytics)', path: '/reports', icon: BarChart3, color: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/10' },
-    { name: 'Documents', path: '/documents', icon: Folder, color: 'from-sky-500 to-indigo-500', shadow: 'shadow-sky-500/10' },
-    { name: 'Settings', path: '/settings', icon: Settings, color: 'from-slate-500 to-slate-700', shadow: 'shadow-slate-500/10' },
+    { name: 'Products', path: '/app/products', icon: Package, color: 'from-purple-500 to-pink-600', shadow: 'shadow-purple-500/10' },
+    { name: 'Invoices (Orders)', path: '/app/invoices', icon: FileText, color: 'from-rose-500 to-red-600', shadow: 'shadow-rose-500/10' },
+    { name: 'Customers', path: '/app/customers', icon: Users, color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/10' },
+    { name: 'Payments', path: '/app/payments', icon: CreditCard, color: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/10' },
+    { name: 'Purchases', path: '/app/purchases', icon: ShoppingBag, color: 'from-cyan-500 to-blue-600', shadow: 'shadow-cyan-500/10' },
+    { name: 'Expenses', path: '/app/expenses', icon: Receipt, color: 'from-rose-500 to-red-650', shadow: 'shadow-rose-500/10' },
+    { name: 'Incomes', path: '/app/incomes', icon: Coins, color: 'from-teal-400 to-emerald-500', shadow: 'shadow-teal-450/10' },
+    { name: 'Leads', path: '/app/leads', icon: Flame, color: 'from-orange-500 to-red-500', shadow: 'shadow-orange-500/10' },
+    { name: 'Tasks', path: '/app/tasks', icon: CheckSquare, color: 'from-indigo-400 to-blue-500', shadow: 'shadow-indigo-500/10' },
+    { name: 'Reports (Analytics)', path: '/app/reports', icon: BarChart3, color: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/10' },
+    { name: 'Documents', path: '/app/documents', icon: Folder, color: 'from-sky-500 to-indigo-500', shadow: 'shadow-sky-500/10' },
+    { name: 'Settings', path: '/app/settings', icon: Settings, color: 'from-slate-500 to-slate-700', shadow: 'shadow-slate-500/10' },
   ];
 
   // Specific dashboard cards requested by the user:
@@ -207,14 +207,14 @@ const Dashboard = () => {
       </div>
 
       {/* WARNING NOTIFICATION BANNER ALERTS */}
-      {(lowStockCount > 0 || pendingPaymentsCount > 0) && (
+       {(lowStockCount > 0 || pendingPaymentsCount > 0) && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {lowStockCount > 0 && (
             <div className="flex items-start gap-3 rounded-2xl border border-red-200/80 bg-red-50 p-4 dark:border-red-950/20 dark:bg-red-950/10 text-red-800 dark:text-red-400">
               <BellRing className="shrink-0 text-red-505" size={16} />
               <div className="text-[11px] font-semibold">
                 <span className="font-black text-red-650">Low Stock Alert:</span> {lowStockCount} items below margin.{' '}
-                <Link to="/products" className="font-bold underline text-red-700 dark:text-red-400">
+                <Link to="/app/products" className="font-bold underline text-red-700 dark:text-red-400">
                   Manage Catalog
                 </Link>
               </div>
@@ -226,7 +226,7 @@ const Dashboard = () => {
               <AlertTriangle className="shrink-0 text-yellow-500" size={16} />
               <div className="text-[11px] font-semibold">
                 <span className="font-black text-yellow-650">Outstanding payments:</span> {pendingPaymentsCount} collections waiting.{' '}
-                <Link to="/payments" className="font-bold underline text-yellow-700 dark:text-yellow-400">
+                <Link to="/app/payments" className="font-bold underline text-yellow-700 dark:text-yellow-400">
                   Reconcile Cash
                 </Link>
               </div>

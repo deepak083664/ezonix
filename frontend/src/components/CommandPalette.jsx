@@ -5,16 +5,16 @@ import { Search, LayoutDashboard, Users, Package, FileSpreadsheet, CreditCard, B
 import API from '../services/api';
 
 const QUICK_LINKS = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard, category: 'Navigation' },
-  { name: 'Customers', path: '/customers', icon: Users, category: 'Records' },
-  { name: 'Products', path: '/products', icon: Package, category: 'Records' },
-  { name: 'Invoices', path: '/invoices', icon: FileSpreadsheet, category: 'Finance' },
-  { name: 'Payments', path: '/payments', icon: CreditCard, category: 'Finance' },
-  { name: 'Leads', path: '/leads', icon: Flame, category: 'Sales' },
-  { name: 'Tasks', path: '/tasks', icon: CheckSquare, category: 'Operations' },
-  { name: 'Documents', path: '/documents', icon: Folder, category: 'Operations' },
-  { name: 'Reports', path: '/reports', icon: BarChart3, category: 'Finance' },
-  { name: 'Settings', path: '/settings', icon: Settings, category: 'System' },
+  { name: 'Dashboard', path: '/app', icon: LayoutDashboard, category: 'Navigation' },
+  { name: 'Customers', path: '/app/customers', icon: Users, category: 'Records' },
+  { name: 'Products', path: '/app/products', icon: Package, category: 'Records' },
+  { name: 'Invoices', path: '/app/invoices', icon: FileSpreadsheet, category: 'Finance' },
+  { name: 'Payments', path: '/app/payments', icon: CreditCard, category: 'Finance' },
+  { name: 'Leads', path: '/app/leads', icon: Flame, category: 'Sales' },
+  { name: 'Tasks', path: '/app/tasks', icon: CheckSquare, category: 'Operations' },
+  { name: 'Documents', path: '/app/documents', icon: Folder, category: 'Operations' },
+  { name: 'Reports', path: '/app/reports', icon: BarChart3, category: 'Finance' },
+  { name: 'Settings', path: '/app/settings', icon: Settings, category: 'System' },
 ];
 
 const CommandPalette = () => {
@@ -88,11 +88,11 @@ const CommandPalette = () => {
     if (item.path) {
       navigate(item.path);
     } else if (item.type === 'customer') {
-      navigate(`/customers?search=${encodeURIComponent(item.keyword)}`);
+      navigate(`/app/customers?search=${encodeURIComponent(item.keyword)}`);
     } else if (item.type === 'product') {
-      navigate(`/products?search=${encodeURIComponent(item.keyword)}`);
+      navigate(`/app/products?search=${encodeURIComponent(item.keyword)}`);
     } else if (item.type === 'invoice') {
-      navigate(`/invoices?search=${encodeURIComponent(item.keyword)}`);
+      navigate(`/app/invoices?search=${encodeURIComponent(item.keyword)}`);
     }
   };
 

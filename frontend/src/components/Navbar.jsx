@@ -92,10 +92,10 @@ const Navbar = ({ onMobileToggle }) => {
         if (res.data.data.notifications) {
           const { lowStockAlerts = [], pendingPaymentsAlerts = [] } = res.data.data.notifications;
           lowStockAlerts.forEach(item => {
-            alertList.push({ id: `stock-${item._id}`, text: `${item.name} is below stock threshold.`, type: 'warning', path: '/products' });
+            alertList.push({ id: `stock-${item._id}`, text: `${item.name} is below stock threshold.`, type: 'warning', path: '/app/products' });
           });
           pendingPaymentsAlerts.forEach(item => {
-            alertList.push({ id: `payment-${item._id}`, text: `Invoice ${item.invoiceNumber} is outstanding.`, type: 'payment', path: '/payments' });
+            alertList.push({ id: `payment-${item._id}`, text: `Invoice ${item.invoiceNumber} is outstanding.`, type: 'payment', path: '/app/payments' });
           });
         }
         setAlerts(alertList);
@@ -157,11 +157,11 @@ const Navbar = ({ onMobileToggle }) => {
     setSearchQuery('');
     
     if (type === 'customer') {
-      navigate(`/customers?search=${encodeURIComponent(keyword)}`);
+      navigate(`/app/customers?search=${encodeURIComponent(keyword)}`);
     } else if (type === 'product') {
-      navigate(`/products?search=${encodeURIComponent(keyword)}`);
+      navigate(`/app/products?search=${encodeURIComponent(keyword)}`);
     } else if (type === 'invoice') {
-      navigate(`/invoices?search=${encodeURIComponent(keyword)}`);
+      navigate(`/app/invoices?search=${encodeURIComponent(keyword)}`);
     }
   };
 
@@ -334,25 +334,25 @@ const Navbar = ({ onMobileToggle }) => {
                 className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-800 dark:bg-slate-900 z-50 text-left"
               >
                 <button
-                  onClick={() => { setShowQuickAction(false); navigate('/customers'); }}
+                  onClick={() => { setShowQuickAction(false); navigate('/app/customers'); }}
                   className="w-full rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50 block text-left"
                 >
                   + Add Customer
                 </button>
                 <button
-                  onClick={() => { setShowQuickAction(false); navigate('/products'); }}
+                  onClick={() => { setShowQuickAction(false); navigate('/app/products'); }}
                   className="w-full rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50 block text-left"
                 >
                   + Add Product
                 </button>
                 <button
-                  onClick={() => { setShowQuickAction(false); navigate('/invoices'); }}
+                  onClick={() => { setShowQuickAction(false); navigate('/app/invoices'); }}
                   className="w-full rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50 block text-left"
                 >
                   + Create Invoice
                 </button>
                 <button
-                  onClick={() => { setShowQuickAction(false); navigate('/tasks'); }}
+                  onClick={() => { setShowQuickAction(false); navigate('/app/tasks'); }}
                   className="w-full rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/50 block text-left"
                 >
                   + Create Task
@@ -447,7 +447,7 @@ const Navbar = ({ onMobileToggle }) => {
                 </div>
 
                 <button
-                  onClick={() => { setShowProfileMenu(false); navigate('/settings'); }}
+                  onClick={() => { setShowProfileMenu(false); navigate('/app/settings'); }}
                   className="w-full rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-800/40 flex items-center gap-2"
                 >
                   <Settings size={13} /> Settings
