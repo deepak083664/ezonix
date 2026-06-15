@@ -30,6 +30,29 @@ const Documents = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp)$/i.test(file.name);
+
+    if (isImage) {
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error('Image size cannot exceed 1MB.');
+        e.target.value = '';
+        return;
+      }
+    } else if (isPdf) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('PDF size cannot exceed 5MB.');
+        e.target.value = '';
+        return;
+      }
+    } else {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File size cannot exceed 5MB.');
+        e.target.value = '';
+        return;
+      }
+    }
+
     setUploading(true);
     toast.loading('Uploading document...', { id: 'upload_toast' });
 
@@ -97,7 +120,7 @@ const Documents = () => {
           <p className="font-bold text-sm text-slate-850 dark:text-slate-200">
             {uploading ? 'Processing file...' : 'Drag & drop file or click to choose'}
           </p>
-          <p className="text-xs text-slate-400">PDF, DOCX, PNG, JPG, or XLSX (Max 10MB)</p>
+          <p className="text-xs text-slate-400">PDF/DOCX/XLSX (Max 5MB), Images (Max 1MB)</p>
         </div>
       </div>
 

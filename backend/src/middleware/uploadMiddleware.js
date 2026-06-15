@@ -3,6 +3,7 @@ const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const fs = require('fs');
 const logger = require('../utils/logger');
+const AppError = require('../utils/appError');
 
 let isCloudinary = false;
 let uploadMemory;
@@ -13,13 +14,13 @@ const fileFilter = (req, file, cb) => {
     if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type! Receipts must be images or PDF files.'), false);
+      cb(new AppError('Invalid file type! Receipts must be images or PDF files.', 400), false);
     }
   } else {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Not an image! Please upload only images.'), false);
+      cb(new AppError('Not an image! Please upload only images.', 400), false);
     }
   }
 };
@@ -69,12 +70,31 @@ const upload = {
     return (req, res, next) => {
       if (isCloudinary) {
         uploadMemory.single(fieldName)(req, res, async (err) => {
-          if (err) return next(err);
+          if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+              const isPdfField = fieldName === 'receipt';
+              const errorMsg = isPdfField 
+                ? 'File size exceeds limit (1MB for images, 5MB for PDFs).' 
+                : 'Image size cannot exceed 1MB.';
+              return next(new AppError(errorMsg, 400));
+            }
+            return next(err);
+          }
           if (!req.file) return next();
+
+          // Enforce custom sizes: Images 1MB, PDFs 5MB
+          const isPdf = req.file.mimetype === 'application/pdf';
+          const maxImgSize = 1 * 1024 * 1024;
+          const maxPdfSize = 5 * 1024 * 1024;
+
+          if (isPdf && req.file.size > maxPdfSize) {
+            return next(new AppError('PDF size cannot exceed 5MB.', 400));
+          } else if (!isPdf && req.file.size > maxImgSize) {
+            return next(new AppError('Image size cannot exceed 1MB.', 400));
+          }
 
           try {
             // Upload memory buffer to Cloudinary
-            const isPdf = req.file.mimetype === 'application/pdf';
             const uploadOptions = {
               folder: 'crm_uploads',
             };
@@ -106,7 +126,35 @@ const upload = {
         });
       } else {
         uploadLocal.single(fieldName)(req, res, (err) => {
-          if (err) return next(err);
+          if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+              const isPdfField = fieldName === 'receipt';
+              const errorMsg = isPdfField 
+                ? 'File size exceeds limit (1MB for images, 5MB for PDFs).' 
+                : 'Image size cannot exceed 1MB.';
+              return next(new AppError(errorMsg, 400));
+            }
+            return next(err);
+          }
+          if (!req.file) return next();
+
+          // Enforce custom sizes: Images 1MB, PDFs 5MB
+          const isPdf = req.file.mimetype === 'application/pdf';
+          const maxImgSize = 1 * 1024 * 1024;
+          const maxPdfSize = 5 * 1024 * 1024;
+
+          if (isPdf && req.file.size > maxPdfSize) {
+            if (fs.existsSync(req.file.path)) {
+              fs.unlinkSync(req.file.path);
+            }
+            return next(new AppError('PDF size cannot exceed 5MB.', 400));
+          } else if (!isPdf && req.file.size > maxImgSize) {
+            if (fs.existsSync(req.file.path)) {
+              fs.unlinkSync(req.file.path);
+            }
+            return next(new AppError('Image size cannot exceed 1MB.', 400));
+          }
+
           next();
         });
       }

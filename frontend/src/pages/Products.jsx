@@ -406,7 +406,17 @@ const Products = () => {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files[0])}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      if (file.size > 1 * 1024 * 1024) {
+                        toast.error('Image size cannot exceed 1MB.');
+                        e.target.value = '';
+                        return;
+                      }
+                      setImageFile(file);
+                    }
+                  }}
                   className="hidden"
                 />
               </label>

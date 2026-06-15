@@ -281,7 +281,26 @@ const Expenses = () => {
                 <input
                   type="file"
                   accept="image/*,application/pdf"
-                  onChange={(e) => setReceiptFile(e.target.files[0])}
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                      if (isPdf) {
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error('PDF size cannot exceed 5MB.');
+                          e.target.value = '';
+                          return;
+                        }
+                      } else {
+                        if (file.size > 1 * 1024 * 1024) {
+                          toast.error('Image size cannot exceed 1MB.');
+                          e.target.value = '';
+                          return;
+                        }
+                      }
+                      setReceiptFile(file);
+                    }
+                  }}
                   className="hidden"
                 />
               </label>

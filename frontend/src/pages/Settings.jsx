@@ -133,8 +133,15 @@ const Settings = () => {
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files[0];
-                    setLogoFile(file);
-                    setLogoPreview(URL.createObjectURL(file));
+                    if (file) {
+                      if (file.size > 1 * 1024 * 1024) {
+                        toast.error('Image size cannot exceed 1MB.');
+                        e.target.value = '';
+                        return;
+                      }
+                      setLogoFile(file);
+                      setLogoPreview(URL.createObjectURL(file));
+                    }
                   }}
                   className="hidden"
                 />
