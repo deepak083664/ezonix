@@ -282,10 +282,10 @@ const Invoices = () => {
                     <tr>
                       <td>${item.name}</td>
                       <td class="text-center">${item.quantity}</td>
-                      <td class="text-right">$${item.price.toFixed(2)}</td>
+                      <td class="text-right">₹${item.price.toFixed(2)}</td>
                       <td class="text-center">${item.taxPercent}%</td>
                       <td class="text-center">${item.discountPercent}%</td>
-                      <td class="text-right">$${total.toFixed(2)}</td>
+                      <td class="text-right">₹${total.toFixed(2)}</td>
                     </tr>
                   `;
                   })
@@ -297,23 +297,23 @@ const Invoices = () => {
               <div class="totals-box">
                 <div class="totals-row">
                   <span>Discount Total:</span>
-                  <span>-$${inv.discountTotal.toFixed(2)}</span>
+                  <span>-₹${inv.discountTotal.toFixed(2)}</span>
                 </div>
                 <div class="totals-row">
                   <span>Tax Total:</span>
-                  <span>+$${inv.taxTotal.toFixed(2)}</span>
+                  <span>+₹${inv.taxTotal.toFixed(2)}</span>
                 </div>
                 <div class="totals-row grand-total">
                   <span>Grand Total:</span>
-                  <span>$${inv.grandTotal.toFixed(2)}</span>
+                  <span>₹${inv.grandTotal.toFixed(2)}</span>
                 </div>
                 <div class="totals-row" style="margin-top:10px;font-size:12px;color:#64748b;">
                   <span>Amount Paid:</span>
-                  <span>$${inv.amountPaid.toFixed(2)}</span>
+                  <span>₹${inv.amountPaid.toFixed(2)}</span>
                 </div>
                 <div class="totals-row" style="font-size:12px;color:#ef4444;font-weight:bold;">
                   <span>Amount Due:</span>
-                  <span>$${inv.amountDue.toFixed(2)}</span>
+                  <span>₹${inv.amountDue.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -360,8 +360,8 @@ const Invoices = () => {
     },
     { header: 'Customer', accessor: 'customer', render: (val) => val?.name || 'Deleted Customer' },
     { header: 'Issue Date', accessor: 'issueDate', render: (val) => new Date(val).toLocaleDateString() },
-    { header: 'Grand Total', accessor: 'grandTotal', render: (val) => `$${val.toFixed(2)}` },
-    { header: 'Due Balance', accessor: 'amountDue', render: (val) => `$${val.toFixed(2)}` },
+    { header: 'Grand Total', accessor: 'grandTotal', render: (val) => `₹${val.toFixed(2)}` },
+    { header: 'Due Balance', accessor: 'amountDue', render: (val) => `₹${val.toFixed(2)}` },
     {
       header: 'Status',
       accessor: 'status',
@@ -539,7 +539,7 @@ const Invoices = () => {
                       <option value="">Select Item</option>
                       {products.map((p) => (
                         <option key={p._id} value={p._id}>
-                          {p.name} (${p.price.toFixed(2)} - Qty: {p.quantity})
+                          {p.name} (₹{p.price.toFixed(2)} - Qty: {p.quantity})
                         </option>
                       ))}
                     </select>
@@ -597,7 +597,7 @@ const Invoices = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Initial Amount Paid ($)
+                Initial Amount Paid (₹)
               </label>
               <input
                 type="number"
@@ -625,28 +625,28 @@ const Invoices = () => {
             <div className="flex justify-between">
               <span>Subtotal:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                ${totals.subtotal.toFixed(2)}
+                ₹{totals.subtotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Discount Total:</span>
               <span className="font-semibold text-red-600 dark:text-red-400">
-                -${totals.discountTotal.toFixed(2)}
+                -₹{totals.discountTotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
               <span>Tax Total:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">
-                +${totals.taxTotal.toFixed(2)}
+                +₹{totals.taxTotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between border-t border-slate-200 pt-2 text-md font-bold text-slate-800 dark:border-slate-700 dark:text-white">
               <span>Grand Total:</span>
-              <span>${totals.grandTotal.toFixed(2)}</span>
+              <span>₹{totals.grandTotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xs text-red-500 font-bold">
               <span>Amount Outstanding Due:</span>
-              <span>${totals.amountDue.toFixed(2)}</span>
+              <span>₹{totals.amountDue.toFixed(2)}</span>
             </div>
           </div>
 
@@ -673,7 +673,7 @@ const Invoices = () => {
         <form onSubmit={handleEditInvoice} className="space-y-4">
           <div className="rounded-lg bg-slate-50 p-4 dark:bg-slate-800 mb-4 text-xs font-semibold text-slate-500">
             Invoice Number: {selectedInvoice?.invoiceNumber}<br />
-            Total: ${selectedInvoice?.grandTotal.toFixed(2)}
+            Total: ₹{selectedInvoice?.grandTotal.toFixed(2)}
           </div>
 
           <div>
@@ -693,7 +693,7 @@ const Invoices = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Total Amount Paid ($)
+              Total Amount Paid (₹)
             </label>
             <input
               type="number"

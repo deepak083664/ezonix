@@ -112,7 +112,7 @@ const Purchases = () => {
     { header: 'Supplier Name', accessor: 'supplierName', render: (val) => <span className="font-semibold text-slate-800 dark:text-slate-200">{val}</span> },
     { header: 'Invoice Number', accessor: 'invoiceNumber', render: (val) => val || 'N/A' },
     { header: 'Purchase Date', accessor: 'purchaseDate', render: (val) => new Date(val).toLocaleDateString() },
-    { header: 'Total Amount', accessor: 'amount', render: (val) => `$${val.toFixed(2)}` },
+    { header: 'Total Amount', accessor: 'amount', render: (val) => `₹${val.toFixed(2)}` },
     {
       header: 'Actions',
       render: (_, row) => (
@@ -258,12 +258,12 @@ const Purchases = () => {
 
           <div>
             <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Total Purchase Cost ($) (Leave empty to sum item lines automatically)
+              Total Purchase Cost (₹) (Leave empty to sum item lines automatically)
             </label>
             <input
               type="number"
               step="0.01"
-              placeholder={`Auto Calc: $${purchaseItems.reduce((acc, item) => acc + item.quantity * item.price, 0).toFixed(2)}`}
+              placeholder={`Auto Calc: ₹${purchaseItems.reduce((acc, item) => acc + item.quantity * item.price, 0).toFixed(2)}`}
               {...register('amount')}
               className="form-input"
             />

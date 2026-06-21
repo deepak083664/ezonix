@@ -295,7 +295,7 @@ const Customers = () => {
                   Total Outstanding Balance
                 </p>
                 <h4 className="text-xl font-extrabold text-slate-850 dark:text-white mt-1">
-                  ${ledgerData?.runningBalance?.toFixed(2) || '0.00'}
+                  ₹{ledgerData?.runningBalance?.toFixed(2) || '0.00'}
                 </h4>
               </div>
               <span
@@ -335,10 +335,10 @@ const Customers = () => {
                           : 'text-green-600 dark:text-green-400'
                       }`}
                     >
-                      {item.direction === 'debit' ? '+' : '-'}${item.amount.toFixed(2)}
+                      {item.direction === 'debit' ? '+' : '-'}₹{item.amount.toFixed(2)}
                     </p>
                     <p className="text-[10px] text-slate-400">
-                      Bal: ${item.runningBalance.toFixed(2)}
+                      Bal: ₹{item.runningBalance.toFixed(2)}
                     </p>
                   </div>
                 </div>

@@ -102,7 +102,7 @@ const Dashboard = () => {
   const dashboardCards = [
     {
       title: 'Revenue',
-      value: `$${sales.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      value: `₹${sales.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       icon: DollarSign,
       color: '#3b82f6',
       bgColor: 'bg-blue-500/10 text-blue-500',
@@ -138,7 +138,7 @@ const Dashboard = () => {
     },
     {
       title: 'Sales',
-      value: `$${paidSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+      value: `₹${paidSales.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
       icon: CheckCircle2,
       color: '#10b981',
       bgColor: 'bg-emerald-500/10 text-emerald-500',
@@ -315,7 +315,7 @@ const Dashboard = () => {
               <Area
                 type="monotone"
                 dataKey="sales"
-                name="Sales ($)"
+                name="Sales (₹)"
                 stroke="#3b82f6"
                 strokeWidth={2}
                 fillOpacity={1}

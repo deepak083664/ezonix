@@ -99,7 +99,7 @@ const Payments = () => {
       ),
     },
     { header: 'Customer', accessor: 'customer', render: (val) => val?.name || 'Deleted Customer' },
-    { header: 'Amount Received', accessor: 'amountPaid', render: (val) => `$${val.toFixed(2)}` },
+    { header: 'Amount Received', accessor: 'amountPaid', render: (val) => `₹${val.toFixed(2)}` },
     { header: 'Date Paid', accessor: 'paymentDate', render: (val) => new Date(val).toLocaleDateString() },
     { header: 'Method', accessor: 'paymentMethod', render: (val) => (
       <span className="inline-block rounded bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
@@ -164,7 +164,7 @@ const Payments = () => {
               <option value="">Choose Invoice</option>
               {pendingInvoices.map((inv) => (
                 <option key={inv._id} value={inv._id}>
-                  {inv.invoiceNumber} - {inv.customer?.name} (Owes: ${inv.amountDue.toFixed(2)})
+                  {inv.invoiceNumber} - {inv.customer?.name} (Owes: ₹{inv.amountDue.toFixed(2)})
                 </option>
               ))}
             </select>
@@ -173,16 +173,16 @@ const Payments = () => {
 
           {selectedInvoice && (
             <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-xs text-blue-800 dark:bg-blue-950/20 dark:border-blue-900/30 dark:text-blue-400">
-              <b>Invoice Grand Total:</b> ${selectedInvoice.grandTotal.toFixed(2)} <br />
-              <b>Total Paid Previously:</b> ${selectedInvoice.amountPaid.toFixed(2)} <br />
-              <b>Remaining Balance Due:</b> ${selectedInvoice.amountDue.toFixed(2)}
+              <b>Invoice Grand Total:</b> ₹{selectedInvoice.grandTotal.toFixed(2)} <br />
+              <b>Total Paid Previously:</b> ₹{selectedInvoice.amountPaid.toFixed(2)} <br />
+              <b>Remaining Balance Due:</b> ₹{selectedInvoice.amountDue.toFixed(2)}
             </div>
           )}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Amount Received ($) *
+                Amount Received (₹) *
               </label>
               <input
                 type="number"

@@ -429,7 +429,7 @@ const AdminDashboard = () => {
                   </div>
                   <p className="text-xs text-slate-500 font-light leading-relaxed mb-4">{p.description}</p>
                   <div className="text-2xl font-black text-slate-850 dark:text-white mb-6">
-                    ${p.price} <span className="text-xs font-medium text-slate-400">/{p.billingCycle}</span>
+                    ₹{p.price} <span className="text-xs font-medium text-slate-400">/{p.billingCycle}</span>
                   </div>
                   <ul className="space-y-2 mb-6 text-xs text-slate-650 dark:text-slate-355 font-light">
                     {p.features.map((feat, fidx) => (
@@ -498,7 +498,7 @@ const AdminDashboard = () => {
                       {s.planId ? (
                         <>
                           <div className="font-bold text-slate-900 dark:text-white">{s.planId.name}</div>
-                          <div className="text-[10px] text-slate-450">${s.planId.price} / {s.planId.billingCycle}</div>
+                          <div className="text-[10px] text-slate-450">₹{s.planId.price} / {s.planId.billingCycle}</div>
                         </>
                       ) : (
                         <span className="text-slate-400 italic">Custom Plan</span>
@@ -702,7 +702,7 @@ const AdminDashboard = () => {
                 <Coins className="text-yellow-500" size={16} />
               </div>
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                ${subscriptions
+                ₹{subscriptions
                   .filter(s => s.status === 'active' && s.planId)
                   .reduce((acc, curr) => acc + (curr.planId?.price || 0), 0)
                 }
@@ -732,7 +732,7 @@ const AdminDashboard = () => {
                 return (
                   <div key={p._id} className="space-y-1">
                     <div className="flex justify-between text-xs font-semibold">
-                      <span>{p.name} (${p.price}/{p.billingCycle})</span>
+                      <span>{p.name} (₹{p.price}/{p.billingCycle})</span>
                       <span>{count} Subscriptions ({pct.toFixed(0)}%)</span>
                     </div>
                     <div className="w-full bg-slate-100 dark:bg-slate-950 h-2 rounded-full overflow-hidden">
@@ -853,7 +853,7 @@ const AdminDashboard = () => {
                   >
                     <option value="">No Plan (Manually Provision Later)</option>
                     {plans.filter(p => p.isActive).map(p => (
-                      <option key={p._id} value={p._id}>{p.name} (${p.price})</option>
+                      <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
                     ))}
                   </select>
                   <p className="text-[9px] text-slate-400 mt-1.5 leading-normal">
@@ -920,7 +920,7 @@ const AdminDashboard = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Price ($ USD)</label>
+                  <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Price (₹ INR)</label>
                   <input 
                     type="number" 
                     required
@@ -1035,7 +1035,7 @@ const AdminDashboard = () => {
                 >
                   <option value="">Choose Plan...</option>
                   {plans.map(p => (
-                    <option key={p._id} value={p._id}>{p.name} (${p.price} / {p.billingCycle})</option>
+                    <option key={p._id} value={p._id}>{p.name} (₹{p.price} / {p.billingCycle})</option>
                   ))}
                 </select>
               </div>

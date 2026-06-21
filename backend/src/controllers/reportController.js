@@ -297,9 +297,9 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
       { header: 'Customer', key: 'customerName', width: 22 },
       { header: 'Issue Date', key: 'issueDate', width: 15 },
       { header: 'Due Date', key: 'dueDate', width: 15 },
-      { header: 'Grand Total ($)', key: 'grandTotal', width: 15 },
-      { header: 'Amount Paid ($)', key: 'amountPaid', width: 15 },
-      { header: 'Amount Due ($)', key: 'amountDue', width: 15 },
+      { header: 'Grand Total (₹)', key: 'grandTotal', width: 15 },
+      { header: 'Amount Paid (₹)', key: 'amountPaid', width: 15 },
+      { header: 'Amount Due (₹)', key: 'amountDue', width: 15 },
       { header: 'Status', key: 'status', width: 12 },
     ],
     '2563EB'
@@ -348,7 +348,7 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
       { header: 'SKU', key: 'sku', width: 15 },
       { header: 'Product Name', key: 'name', width: 22 },
       { header: 'Category', key: 'categoryName', width: 18 },
-      { header: 'Price ($)', key: 'price', width: 12 },
+      { header: 'Price (₹)', key: 'price', width: 12 },
       { header: 'Stock Qty', key: 'quantity', width: 12 },
       { header: 'Low Stock Limit', key: 'lowStockThreshold', width: 15 },
     ],
@@ -373,7 +373,7 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
       { header: 'Supplier Name', key: 'supplierName', width: 22 },
       { header: 'Invoice Code', key: 'invoiceNumber', width: 15 },
       { header: 'Purchase Date', key: 'purchaseDate', width: 15 },
-      { header: 'Amount ($)', key: 'amount', width: 12 },
+      { header: 'Amount (₹)', key: 'amount', width: 12 },
     ],
     'B45309'
   );
@@ -392,7 +392,7 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
     expSheet,
     [
       { header: 'Category', key: 'category', width: 18 },
-      { header: 'Amount ($)', key: 'amount', width: 12 },
+      { header: 'Amount (₹)', key: 'amount', width: 12 },
       { header: 'Date', key: 'date', width: 15 },
       { header: 'Description', key: 'description', width: 30 },
     ],
@@ -414,7 +414,7 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
     [
       { header: 'Invoice Number', key: 'invoiceNum', width: 22 },
       { header: 'Customer Name', key: 'customerName', width: 22 },
-      { header: 'Amount Paid ($)', key: 'amountPaid', width: 15 },
+      { header: 'Amount Paid (₹)', key: 'amountPaid', width: 15 },
       { header: 'Payment Date', key: 'paymentDate', width: 15 },
       { header: 'Method', key: 'paymentMethod', width: 15 },
     ],
@@ -436,7 +436,7 @@ exports.exportCompleteExcel = catchAsync(async (req, res, next) => {
     incomeSheet,
     [
       { header: 'Source Category', key: 'incomeSourceName', width: 22 },
-      { header: 'Amount ($)', key: 'amount', width: 12 },
+      { header: 'Amount (₹)', key: 'amount', width: 12 },
       { header: 'Date', key: 'date', width: 15 },
       { header: 'Received Through', key: 'receivedThrough', width: 18 },
       { header: 'Reference Code', key: 'referenceNumber', width: 20 },
@@ -599,9 +599,9 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
         { header: 'Customer', key: 'customerName', width: 22 },
         { header: 'Issue Date', key: 'issueDate', width: 15 },
         { header: 'Due Date', key: 'dueDate', width: 15 },
-        { header: 'Grand Total ($)', key: 'grandTotal', width: 15 },
-        { header: 'Amount Paid ($)', key: 'amountPaid', width: 15 },
-        { header: 'Amount Due ($)', key: 'amountDue', width: 15 },
+        { header: 'Grand Total (₹)', key: 'grandTotal', width: 15 },
+        { header: 'Amount Paid (₹)', key: 'amountPaid', width: 15 },
+        { header: 'Amount Due (₹)', key: 'amountDue', width: 15 },
         { header: 'Status', key: 'status', width: 12 },
       ],
       '2563EB'
@@ -630,7 +630,7 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
       sheet,
       [
         { header: 'Category', key: 'category', width: 18 },
-        { header: 'Amount ($)', key: 'amount', width: 12 },
+        { header: 'Amount (₹)', key: 'amount', width: 12 },
         { header: 'Date', key: 'date', width: 15 },
         { header: 'Description', key: 'description', width: 30 },
       ],
@@ -658,7 +658,7 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
         { header: 'Supplier Name', key: 'supplierName', width: 22 },
         { header: 'Invoice Code', key: 'invoiceNumber', width: 15 },
         { header: 'Purchase Date', key: 'purchaseDate', width: 15 },
-        { header: 'Amount ($)', key: 'amount', width: 12 },
+        { header: 'Amount (₹)', key: 'amount', width: 12 },
       ],
       'B45309'
     );
@@ -682,7 +682,7 @@ exports.exportCategoryExcel = catchAsync(async (req, res, next) => {
       sheet,
       [
         { header: 'Source Category', key: 'incomeSourceName', width: 22 },
-        { header: 'Amount ($)', key: 'amount', width: 12 },
+        { header: 'Amount (₹)', key: 'amount', width: 12 },
         { header: 'Date', key: 'date', width: 15 },
         { header: 'Received Through', key: 'receivedThrough', width: 18 },
         { header: 'Reference Code', key: 'referenceNumber', width: 20 },

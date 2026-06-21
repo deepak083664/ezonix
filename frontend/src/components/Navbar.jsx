@@ -37,17 +37,18 @@ const Navbar = ({ onMobileToggle }) => {
     }, 3000);
   };
 
-  const handleAdminPassSubmit = (e) => {
+  const handleAdminPassSubmit = async (e) => {
     e.preventDefault();
-    if (adminPassword === 'ezonix@2026') {
+    try {
+      await API.post('/auth/verify-admin-key', { key: adminPassword });
       sessionStorage.setItem('adminUnlocked', 'true');
       setShowAdminPassModal(false);
       setAdminPassword('');
       setShowPasswordText(false);
       toast.success('Admin Panel unlocked successfully!');
       navigate('/app/admin');
-    } else {
-      toast.error('Incorrect admin password.');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Incorrect admin password.');
     }
   };
   

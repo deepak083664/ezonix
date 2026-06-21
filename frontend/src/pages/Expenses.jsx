@@ -111,7 +111,7 @@ const Expenses = () => {
         </span>
       ),
     },
-    { header: 'Amount', accessor: 'amount', render: (val) => `$${val.toFixed(2)}` },
+    { header: 'Amount', accessor: 'amount', render: (val) => `₹${val.toFixed(2)}` },
     { header: 'Date', accessor: 'date', render: (val) => new Date(val).toLocaleDateString() },
     { header: 'Description', accessor: 'description', render: (val) => val || '-' },
     {
@@ -245,7 +245,7 @@ const Expenses = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Amount ($) *
+                Amount (₹) *
               </label>
               <input
                 type="number"

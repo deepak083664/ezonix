@@ -74,7 +74,7 @@ const generateInvoicePDF = (invoice, setting, res) => {
     doc.fillColor(textColor).fontSize(9);
     doc.text(item.name || 'Product', 60, currentY + 6, { width: 190, height: 12, ellipsis: true });
     doc.text(item.quantity.toString(), 260, currentY + 6, { width: 40, align: 'center' });
-    doc.text(`$${item.price.toFixed(2)}`, 300, currentY + 6, { width: 60, align: 'right' });
+    doc.text(`Rs. ${item.price.toFixed(2)}`, 300, currentY + 6, { width: 60, align: 'right' });
     doc.text(`${item.taxPercent}%`, 365, currentY + 6, { width: 40, align: 'center' });
     doc.text(`${item.discountPercent}%`, 410, currentY + 6, { width: 40, align: 'center' });
 
@@ -84,7 +84,7 @@ const generateInvoicePDF = (invoice, setting, res) => {
     const itemDisc = itemSub * (item.discountPercent / 100);
     const itemTotal = itemSub + itemTax - itemDisc;
 
-    doc.text(`$${itemTotal.toFixed(2)}`, 460, currentY + 6, { width: 80, align: 'right' });
+    doc.text(`Rs. ${itemTotal.toFixed(2)}`, 460, currentY + 6, { width: 80, align: 'right' });
 
     currentY += 20;
   });
@@ -110,18 +110,18 @@ const generateInvoicePDF = (invoice, setting, res) => {
   const subtotal = invoice.items.reduce((acc, item) => acc + (item.quantity * item.price), 0);
 
   doc.text('Subtotal:', calcX, totalsY, { width: 100, align: 'right' });
-  doc.text(`$${subtotal.toFixed(2)}`, calcValX, totalsY, { width: 80, align: 'right' });
+  doc.text(`Rs. ${subtotal.toFixed(2)}`, calcValX, totalsY, { width: 80, align: 'right' });
 
   doc.text('Discount Total:', calcX, totalsY + 15, { width: 100, align: 'right' });
-  doc.text(`-$${invoice.discountTotal.toFixed(2)}`, calcValX, totalsY + 15, { width: 80, align: 'right' });
+  doc.text(`-Rs. ${invoice.discountTotal.toFixed(2)}`, calcValX, totalsY + 15, { width: 80, align: 'right' });
 
   doc.text('Tax Total:', calcX, totalsY + 30, { width: 100, align: 'right' });
-  doc.text(`+$${invoice.taxTotal.toFixed(2)}`, calcValX, totalsY + 30, { width: 80, align: 'right' });
+  doc.text(`+Rs. ${invoice.taxTotal.toFixed(2)}`, calcValX, totalsY + 30, { width: 80, align: 'right' });
 
   // Grand Total highlight
   doc.rect(calcX, totalsY + 47, 200, 22).fill(lightBg);
   doc.fillColor(primaryColor).fontSize(11).text('Grand Total:', calcX + 10, totalsY + 53, { width: 90, align: 'left' });
-  doc.text(`$${invoice.grandTotal.toFixed(2)}`, calcValX, totalsY + 53, { width: 80, align: 'right' });
+  doc.text(`Rs. ${invoice.grandTotal.toFixed(2)}`, calcValX, totalsY + 53, { width: 80, align: 'right' });
 
   // --- FOOTER BANNER ---
   doc.fillColor('#94A3B8').fontSize(9).text('Thank you for choosing our business!', 50, 750, { align: 'center', width: 500 });

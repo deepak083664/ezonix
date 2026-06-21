@@ -259,7 +259,7 @@ const Incomes = () => {
       accessor: 'amount',
       render: (val) => (
         <span className="font-bold text-emerald-600 dark:text-emerald-450">
-          +${val.toFixed(2)}
+          +₹{val.toFixed(2)}
         </span>
       ),
     },
@@ -384,7 +384,7 @@ const Incomes = () => {
                   Total Income Logged
                 </span>
                 <h3 className="mt-1 text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                  ${totalIncomesSum.toFixed(2)}
+                  ₹{totalIncomesSum.toFixed(2)}
                 </h3>
               </div>
               <div className="rounded-lg bg-emerald-500/10 p-3 text-emerald-600 dark:text-emerald-400">
@@ -407,7 +407,7 @@ const Incomes = () => {
                       width: `${contrib.percentage}%`,
                       backgroundColor: contrib.color,
                     }}
-                    title={`${contrib.name}: ${contrib.percentage.toFixed(1)}% ($${contrib.total.toFixed(2)})`}
+                    title={`${contrib.name}: ${contrib.percentage.toFixed(1)}% (₹${contrib.total.toFixed(2)})`}
                     className="h-full first:rounded-l-full last:rounded-r-full transition-all"
                   />
                 ))}
@@ -580,7 +580,7 @@ const Incomes = () => {
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Amount Received ($) *
+                Amount Received (₹) *
               </label>
               <input
                 type="number"

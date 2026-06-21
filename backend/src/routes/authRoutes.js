@@ -9,5 +9,6 @@ router.post('/google', authController.googleLogin);
 // Protected routes
 router.use(protect);
 router.get('/me', authController.getMe);
+router.post('/verify-admin-key', authController.verifyAdminKey);
 
 module.exports = router;

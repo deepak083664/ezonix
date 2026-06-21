@@ -185,7 +185,7 @@ const Products = () => {
       ),
     },
     { header: 'Category', accessor: 'category', render: (val) => val?.name || '-' },
-    { header: 'Price', accessor: 'price', render: (val) => `$${val.toFixed(2)}` },
+    { header: 'Price', accessor: 'price', render: (val) => `₹${val.toFixed(2)}` },
     {
       header: 'Stock Quantity',
       accessor: 'quantity',
@@ -360,7 +360,7 @@ const Products = () => {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Price ($) *
+                Price (₹) *
               </label>
               <input
                 type="number"

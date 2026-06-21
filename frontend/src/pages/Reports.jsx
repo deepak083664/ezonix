@@ -190,7 +190,7 @@ const Reports = () => {
               Sum Aggregate Total
             </span>
             <h3 className="mt-2 text-2xl font-bold text-blue-600 dark:text-blue-400">
-              ${totals.sum.toFixed(2)}
+              ₹{totals.sum.toFixed(2)}
             </h3>
           </div>
         </div>
@@ -228,7 +228,7 @@ const Reports = () => {
                       {row.customer?.name || row.description || `Procurement Items Count: ${row.items?.length || 0}`}
                     </td>
                     <td className="px-6 py-4 text-right font-bold text-slate-900 dark:text-white">
-                      ${(row.grandTotal || row.amount).toFixed(2)}
+                      ₹{(row.grandTotal || row.amount).toFixed(2)}
                     </td>
                   </tr>
                 ))}

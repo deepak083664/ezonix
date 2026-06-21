@@ -197,3 +197,23 @@ exports.getMe = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.verifyAdminKey = catchAsync(async (req, res, next) => {
+  const { key } = req.body;
+
+  if (!key) {
+    return next(new AppError('Security key is required', 400));
+  }
+
+  const correctKey = process.env.ADMIN_PANEL_KEY || 'ezonix@2026';
+
+  if (key !== correctKey) {
+    return next(new AppError('Incorrect admin password.', 401));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    unlocked: true,
+  });
+});
+
