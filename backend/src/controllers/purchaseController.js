@@ -41,21 +41,24 @@ exports.getAllPurchases = catchAsync(async (req, res, next) => {
 exports.createPurchase = catchAsync(async (req, res, next) => {
   const { supplierName, amount, purchaseDate, items, invoiceNumber } = req.body;
 
-  // If items are provided, check if we can match any products by SKU or Name, and increment inventory stock!
+  const productsToUpdate = [];
+
+  // 1) First pass: Find all products to make sure we have references ready (dry run)
   if (items && items.length > 0) {
     for (const item of items) {
-      // Find product by exact SKU or Name (case insensitive)
       const product = await Product.findOne({
         $or: [{ sku: item.name.toUpperCase() }, { name: { $regex: new RegExp(`^${escapeRegExp(item.name)}$`, 'i') } }],
       });
-
       if (product) {
-        product.quantity += parseInt(item.quantity);
-        await product.save();
+        productsToUpdate.push({
+          product,
+          quantityToAdd: parseInt(item.quantity)
+        });
       }
     }
   }
 
+  // 2) Create the purchase record. If this fails, no stock is altered.
   const newPurchase = await Purchase.create({
     supplierName,
     amount,
@@ -63,6 +66,12 @@ exports.createPurchase = catchAsync(async (req, res, next) => {
     items,
     invoiceNumber,
   });
+
+  // 3) Update stock levels only after purchase record is successfully saved
+  for (const updateObj of productsToUpdate) {
+    updateObj.product.quantity += updateObj.quantityToAdd;
+    await updateObj.product.save();
+  }
 
   res.status(201).json({
     status: 'success',

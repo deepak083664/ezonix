@@ -74,16 +74,25 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     setting = await Setting.create({ businessName: 'ezonix' });
   }
 
+  // 1) Find the next unused invoice number (handling deletions & gaps)
   const count = await Invoice.countDocuments();
   const prefix = setting.invoicePrefix || 'INV';
-  const serial = String(count + 1).padStart(5, '0');
-  const invoiceNumber = `${prefix}-${new Date().getFullYear()}-${serial}`;
+  const year = new Date().getFullYear();
+  let serialNumber = count + 1;
+  let invoiceNumber = `${prefix}-${year}-${String(serialNumber).padStart(5, '0')}`;
+
+  while (await Invoice.findOne({ invoiceNumber })) {
+    serialNumber += 1;
+    invoiceNumber = `${prefix}-${year}-${String(serialNumber).padStart(5, '0')}`;
+  }
 
   let taxTotal = 0;
   let discountTotal = 0;
   let grandTotal = 0;
   const itemsSnapshot = [];
+  const productsToUpdate = [];
 
+  // 2) First pass: Verify all products exist and have sufficient stock (dry run)
   for (const item of items) {
     const product = await Product.findById(item.product);
     if (!product) {
@@ -117,8 +126,10 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
       discountPercent: item.discountPercent || 0,
     });
 
-    product.quantity -= item.quantity;
-    await product.save();
+    productsToUpdate.push({
+      product,
+      quantityToSubtract: item.quantity
+    });
   }
 
   const finalOverallDiscount = parseFloat(overallDiscount || 0);
@@ -130,6 +141,7 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     status = 'overdue';
   }
 
+  // 3) Create the invoice. If this throws a DB/validation error, NO stock is altered!
   const newInvoice = await Invoice.create({
     invoiceNumber,
     customer: customerId,
@@ -144,6 +156,12 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     dueDate,
     notes,
   });
+
+  // 4) Deduct stock only AFTER invoice creation is successful
+  for (const updateObj of productsToUpdate) {
+    updateObj.product.quantity -= updateObj.quantityToSubtract;
+    await updateObj.product.save();
+  }
 
   const customer = await Customer.findById(customerId);
   const customerName = customer ? customer.name : 'Client';
