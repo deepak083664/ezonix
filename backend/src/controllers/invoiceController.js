@@ -251,5 +251,5 @@ exports.downloadInvoicePDF = catchAsync(async (req, res, next) => {
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename=Invoice-${invoice.invoiceNumber}.pdf`);
 
-  generateInvoicePDF(invoice, setting, res);
+  await generateInvoicePDF(invoice, setting, res);
 });

@@ -81,6 +81,25 @@ const Login = () => {
         {/* Action Panel */}
         <div className="mt-8 space-y-4">
           <div className="w-full" id="googleSignInBtn"></div>
+          {import.meta.env.DEV && (
+            <button
+              onClick={async () => {
+                setLoading(true);
+                try {
+                  await loginWithGoogle('dev-bypass-admin');
+                  toast.success('Successfully logged in as Dev Admin!');
+                  navigate('/app');
+                } catch (err) {
+                  toast.error(err.message || 'Dev login bypass failed.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="w-full py-2.5 px-4 border border-transparent rounded-lg text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600 cursor-pointer text-center"
+            >
+              Dev Admin Bypass Login
+            </button>
+          )}
         </div>
 
         {/* Footer info warning */}

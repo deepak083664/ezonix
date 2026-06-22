@@ -159,6 +159,82 @@ const upload = {
         });
       }
     };
+  },
+  fields: (fieldsArray) => {
+    return (req, res, next) => {
+      if (isCloudinary) {
+        uploadMemory.fields(fieldsArray)(req, res, async (err) => {
+          if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+              return next(new AppError('Image size cannot exceed 1MB.', 400));
+            }
+            return next(err);
+          }
+          if (!req.files) return next();
+
+          try {
+            for (const field of fieldsArray) {
+              const files = req.files[field.name];
+              if (files && files.length > 0) {
+                const file = files[0];
+                const maxImgSize = 1 * 1024 * 1024;
+                if (file.size > maxImgSize) {
+                  return next(new AppError(`${field.name} size cannot exceed 1MB.`, 400));
+                }
+
+                const result = await new Promise((resolve, reject) => {
+                  const stream = cloudinary.uploader.upload_stream(
+                    {
+                      folder: 'crm_uploads',
+                      allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+                    },
+                    (error, uploadResult) => {
+                      if (error) reject(error);
+                      else resolve(uploadResult);
+                    }
+                  );
+                  stream.end(file.buffer);
+                });
+
+                file.path = result.secure_url;
+                file.filename = result.public_id;
+              }
+            }
+            next();
+          } catch (uploadError) {
+            next(uploadError);
+          }
+        });
+      } else {
+        uploadLocal.fields(fieldsArray)(req, res, (err) => {
+          if (err) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+              return next(new AppError('Image size cannot exceed 1MB.', 400));
+            }
+            return next(err);
+          }
+          if (!req.files) return next();
+
+          for (const field of fieldsArray) {
+            const files = req.files[field.name];
+            if (files && files.length > 0) {
+              const file = files[0];
+              const maxImgSize = 1 * 1024 * 1024;
+              if (file.size > maxImgSize) {
+                for (const fld of fieldsArray) {
+                  const fsToClean = req.files[fld.name];
+                  if (fsToClean && fsToClean.length > 0 && fs.existsSync(fsToClean[0].path)) {
+                    fs.unlinkSync(fsToClean[0].path);
+                  }
+                }
+                return next(new AppError(`${field.name} size cannot exceed 1MB.`, 400));
+              }
+            }
+          }
+          next();
+        });
+      }
+    };
   }
 };
 

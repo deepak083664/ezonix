@@ -40,13 +40,31 @@ exports.updateSettings = catchAsync(async (req, res, next) => {
 
   const updateData = { ...req.body };
 
-  if (req.file) {
-    // Delete old logo
-    if (setting.logoUrl) {
-      await deleteFile(setting.logoUrl, setting.logoPublicId);
+  if (req.files) {
+    if (req.files.logo && req.files.logo[0]) {
+      const logoFile = req.files.logo[0];
+      if (setting.logoUrl) {
+        await deleteFile(setting.logoUrl, setting.logoPublicId);
+      }
+      updateData.logoUrl = logoFile.path || `/uploads/${logoFile.filename}`;
+      updateData.logoPublicId = logoFile.filename || '';
     }
-    updateData.logoUrl = req.file.path || `/uploads/${req.file.filename}`;
-    updateData.logoPublicId = req.file.filename || '';
+    if (req.files.qrCode1 && req.files.qrCode1[0]) {
+      const qr1File = req.files.qrCode1[0];
+      if (setting.qrCode1Url) {
+        await deleteFile(setting.qrCode1Url, setting.qrCode1PublicId);
+      }
+      updateData.qrCode1Url = qr1File.path || `/uploads/${qr1File.filename}`;
+      updateData.qrCode1PublicId = qr1File.filename || '';
+    }
+    if (req.files.qrCode2 && req.files.qrCode2[0]) {
+      const qr2File = req.files.qrCode2[0];
+      if (setting.qrCode2Url) {
+        await deleteFile(setting.qrCode2Url, setting.qrCode2PublicId);
+      }
+      updateData.qrCode2Url = qr2File.path || `/uploads/${qr2File.filename}`;
+      updateData.qrCode2PublicId = qr2File.filename || '';
+    }
   }
 
   const updatedSetting = await Setting.findByIdAndUpdate(setting._id, updateData, {

@@ -1,6 +1,30 @@
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
-const generateInvoicePDF = (invoice, setting, res) => {
+const getImgBufferOrPath = async (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return null;
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    } catch (err) {
+      console.error('Failed to fetch remote image:', url, err);
+      return null;
+    }
+  } else {
+    // Local path, e.g. /uploads/logo-xxx.png
+    const localPath = path.join(__dirname, '../../public', url);
+    if (fs.existsSync(localPath)) {
+      return localPath;
+    }
+    return null;
+  }
+};
+
+const generateInvoicePDF = async (invoice, setting, res) => {
   const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
   // Stream the PDF directly to Express response
@@ -13,14 +37,38 @@ const generateInvoicePDF = (invoice, setting, res) => {
   const lightBg = '#F8FAFC'; // Light Gray
 
   // --- HEADER SECTION ---
-  doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+  let logoSource = null;
+  if (setting.logoUrl) {
+    logoSource = await getImgBufferOrPath(setting.logoUrl);
+  }
+
+  let headerTextY = 75;
+  if (logoSource) {
+    try {
+      doc.image(logoSource, 50, 40, { fit: [120, 40] });
+      headerTextY = 90; // start text after the logo with a small offset
+    } catch (e) {
+      console.error('Error drawing logo image: ', e);
+      doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+      headerTextY = 75;
+    }
+  } else {
+    doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+    headerTextY = 75;
+  }
   
   doc.fontSize(9).fillColor(textColor);
-  if (setting.address) doc.text(setting.address, 50, 75);
-  if (setting.phone || setting.email) {
-    doc.text(`${setting.phone ? `Phone: ${setting.phone}` : ''} ${setting.email ? `| Email: ${setting.email}` : ''}`, 50, 90);
+  if (setting.address) {
+    doc.text(setting.address, 50, headerTextY);
+    headerTextY += 15;
   }
-  if (setting.gstNumber) doc.text(`GSTIN: ${setting.gstNumber}`, 50, 105);
+  if (setting.phone || setting.email) {
+    doc.text(`${setting.phone ? `Phone: ${setting.phone}` : ''} ${setting.email ? `| Email: ${setting.email}` : ''}`, 50, headerTextY);
+    headerTextY += 15;
+  }
+  if (setting.gstNumber) {
+    doc.text(`GSTIN: ${setting.gstNumber}`, 50, headerTextY);
+  }
 
   // Invoice Title and Metadata (Right Aligned)
   doc.fillColor(primaryColor).fontSize(24).text('INVOICE', 350, 40, { align: 'right', width: 200 });
@@ -153,8 +201,85 @@ const generateInvoicePDF = (invoice, setting, res) => {
     doc.fillColor(textColor).font('Helvetica');
   }
 
+  // --- PAYMENT DETAILS & QR CODE ---
+  currentYOffset += 35;
+
+  // Let's check if the remaining space is enough (we need at least 150 points for payment info + QR code)
+  // Page height is 841, margin bottom is 50. Total printable area height = 791.
+  // Terms & Conditions block starts at Y = 710.
+  // So if currentYOffset > 560, we should add a new page so that the payment details are printed cleanly.
+  if (currentYOffset > 560) {
+    doc.addPage();
+    currentYOffset = 50;
+  }
+
+  // Draw a separator line
+  doc.moveTo(50, currentYOffset).lineTo(550, currentYOffset).strokeColor('#E2E8F0').lineWidth(1).stroke();
+  currentYOffset += 15;
+
+  // Fetch active QR Code
+  let qrCodeUrl = '';
+  if (setting.activeQrCode === 'qr2') {
+    qrCodeUrl = setting.qrCode2Url;
+  } else {
+    qrCodeUrl = setting.qrCode1Url;
+  }
+
+  let qrSource = null;
+  if (qrCodeUrl) {
+    qrSource = await getImgBufferOrPath(qrCodeUrl);
+  }
+
+  let leftColY = currentYOffset;
+  const hasBankDetails = setting.bankName || setting.accountHolderName || setting.accountNumber || setting.ifscCode;
+
+  if (hasBankDetails) {
+    doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(10).text('Payment Information (Bank Transfer)', 50, leftColY);
+    leftColY += 16;
+
+    doc.font('Helvetica').fontSize(8.5).fillColor(textColor);
+    if (setting.accountHolderName) {
+      doc.text(`Account Holder: ${setting.accountHolderName}`, 50, leftColY);
+      leftColY += 13;
+    }
+    if (setting.bankName) {
+      doc.text(`Bank Name: ${setting.bankName}`, 50, leftColY);
+      leftColY += 13;
+    }
+    if (setting.accountNumber) {
+      doc.text(`Account Number: ${setting.accountNumber}`, 50, leftColY);
+      leftColY += 13;
+    }
+    if (setting.ifscCode) {
+      doc.text(`IFSC Code: ${setting.ifscCode}`, 50, leftColY);
+      leftColY += 13;
+    }
+  }
+
+  // Render QR Code in Right Column (if available)
+  if (qrSource) {
+    try {
+      // Position QR code on the right (X = 460, Y = currentYOffset, Width = 70, Height = 70)
+      doc.image(qrSource, 460, currentYOffset, { fit: [70, 70] });
+      doc.font('Helvetica-Bold').fontSize(8).fillColor(secondaryColor).text('Scan to Pay', 460, currentYOffset + 75, { width: 70, align: 'center' });
+    } catch (e) {
+      console.error('Error drawing QR code image: ', e);
+    }
+  }
+
+  // --- TERMS & CONDITIONS & FOOTER ---
+  // Place terms and conditions at a fixed height from the bottom of the page (e.g. Y = 710)
+  const termsY = 710;
+  doc.moveTo(50, termsY - 5).lineTo(550, termsY - 5).strokeColor('#E2E8F0').lineWidth(0.5).stroke();
+
+  doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(8).text('Terms & Conditions:', 50, termsY);
+  doc.font('Helvetica').fontSize(7.5).fillColor('#64748B');
+  doc.text('1. Payment is due within the stipulated due date. Please reference the invoice number on your payment.', 50, termsY + 12);
+  doc.text('2. Please review the invoice details immediately. Any discrepancies must be reported within 3 business days.', 50, termsY + 22);
+  doc.text('3. This document is a computer-generated invoice and does not require a physical signature.', 50, termsY + 32);
+
   // --- FOOTER BANNER ---
-  doc.fillColor('#94A3B8').fontSize(9).text('Thank you for choosing our business!', 50, 750, { align: 'center', width: 500 });
+  doc.fillColor('#94A3B8').fontSize(8.5).text('Thank you for choosing our business!', 50, 770, { align: 'center', width: 500 });
 
   doc.end();
 };

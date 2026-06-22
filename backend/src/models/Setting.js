@@ -50,6 +50,47 @@ const settingSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    bankName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    accountHolderName: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    accountNumber: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    ifscCode: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    qrCode1Url: {
+      type: String,
+      default: '',
+    },
+    qrCode1PublicId: {
+      type: String,
+      default: '',
+    },
+    qrCode2Url: {
+      type: String,
+      default: '',
+    },
+    qrCode2PublicId: {
+      type: String,
+      default: '',
+    },
+    activeQrCode: {
+      type: String,
+      enum: ['qr1', 'qr2'],
+      default: 'qr1',
+    },
   },
   {
     timestamps: true,
