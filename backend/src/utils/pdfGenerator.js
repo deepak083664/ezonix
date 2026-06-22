@@ -46,16 +46,16 @@ const generateInvoicePDF = async (invoice, setting, res) => {
   if (logoSource) {
     try {
       doc.image(logoSource, 50, 40, { fit: [120, 40] });
-      // Render brand name next to logo
-      doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(20).text(setting.businessName || '', 185, 48, { align: 'left', width: 160 });
+      // Render brand name next to logo - black text
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 185, 48, { align: 'left', width: 200 });
       headerTextY = 95;
     } catch (e) {
       console.error('Error drawing logo image: ', e);
-      doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
       headerTextY = 75;
     }
   } else {
-    doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
     headerTextY = 75;
   }
   

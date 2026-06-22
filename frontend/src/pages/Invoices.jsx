@@ -243,7 +243,7 @@ const Invoices = () => {
             <style>
               body { font-family: 'Segoe UI', Arial, sans-serif; color: #334155; padding: 40px; margin: 0; line-height: 1.5; }
               .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
-              .business { font-size: 20px; font-weight: bold; color: #1e293b; }
+              .business { font-size: 20px; font-weight: bold; color: #000000; }
               .invoice-title { font-size: 28px; color: #2563eb; font-weight: 800; text-align: right; }
               .details { margin-top: 30px; display: flex; justify-content: space-between; }
               .section-title { font-size: 12px; font-weight: bold; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
