@@ -263,7 +263,12 @@ const Invoices = () => {
           <body>
             <div class="header">
               <div>
-                <div class="business">${settings?.businessName || 'Business Management CRM'}</div>
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+                  ${settings?.logoUrl ? `
+                    <img src="${settings.logoUrl.startsWith('http') ? settings.logoUrl : `${BACKEND_URL}${settings.logoUrl}`}" alt="Logo" style="max-height: 40px; max-width: 120px; object-fit: contain;" />
+                  ` : ''}
+                  <div class="business">${settings?.businessName || 'Business Management CRM'}</div>
+                </div>
                 <div style="font-size:12px;margin-top:5px;">
                   ${settings?.address || ''}<br>
                   Phone: ${settings?.phone || ''} | Email: ${settings?.email || ''}<br>

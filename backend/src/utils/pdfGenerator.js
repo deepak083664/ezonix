@@ -46,28 +46,36 @@ const generateInvoicePDF = async (invoice, setting, res) => {
   if (logoSource) {
     try {
       doc.image(logoSource, 50, 40, { fit: [120, 40] });
-      headerTextY = 90; // start text after the logo with a small offset
+      // Render brand name next to logo
+      doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(20).text(setting.businessName || '', 185, 48, { align: 'left', width: 160 });
+      headerTextY = 95;
     } catch (e) {
       console.error('Error drawing logo image: ', e);
-      doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+      doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
       headerTextY = 75;
     }
   } else {
-    doc.fillColor(secondaryColor).fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+    doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
     headerTextY = 75;
   }
   
-  doc.fontSize(9).fillColor(textColor);
+  doc.font('Helvetica').fontSize(9).fillColor(textColor);
   if (setting.address) {
-    doc.text(setting.address, 50, headerTextY);
-    headerTextY += 15;
+    const addressHeight = doc.heightOfString(setting.address, { width: 280 });
+    doc.text(setting.address, 50, headerTextY, { width: 280 });
+    headerTextY += addressHeight + 4;
   }
   if (setting.phone || setting.email) {
-    doc.text(`${setting.phone ? `Phone: ${setting.phone}` : ''} ${setting.email ? `| Email: ${setting.email}` : ''}`, 50, headerTextY);
-    headerTextY += 15;
+    const contactText = `${setting.phone ? `Phone: ${setting.phone}` : ''} ${setting.email ? ` | Email: ${setting.email}` : ''}`;
+    const contactHeight = doc.heightOfString(contactText, { width: 280 });
+    doc.text(contactText, 50, headerTextY, { width: 280 });
+    headerTextY += contactHeight + 4;
   }
   if (setting.gstNumber) {
-    doc.text(`GSTIN: ${setting.gstNumber}`, 50, headerTextY);
+    const gstText = `GSTIN: ${setting.gstNumber}`;
+    const gstHeight = doc.heightOfString(gstText, { width: 280 });
+    doc.text(gstText, 50, headerTextY, { width: 280 });
+    headerTextY += gstHeight + 4;
   }
 
   // Invoice Title and Metadata (Right Aligned)
@@ -88,19 +96,45 @@ const generateInvoicePDF = async (invoice, setting, res) => {
   doc.rect(statusX, 120, 60, 15).fill(statusColor);
   doc.fillColor('#FFFFFF').fontSize(8).text(statusText, statusX, 124, { width: 60, align: 'center' });
 
-  // Line Separator
-  doc.moveTo(50, 145).lineTo(550, 145).strokeColor('#E2E8F0').lineWidth(1).stroke();
+  // Line Separator (placed below both left and right header elements)
+  const separatorY = Math.max(145, headerTextY + 10);
+  doc.moveTo(50, separatorY).lineTo(550, separatorY).strokeColor('#E2E8F0').lineWidth(1).stroke();
 
   // --- BILLING INFORMATION ---
-  doc.fillColor(secondaryColor).fontSize(11).text('BILL TO:', 50, 160);
-  doc.fillColor(textColor).fontSize(10).text(invoice.customer.name, 50, 175);
-  if (invoice.customer.address) doc.text(invoice.customer.address, 50, 190);
-  doc.text(`Phone: ${invoice.customer.phone}`, 50, 205);
-  if (invoice.customer.email) doc.text(`Email: ${invoice.customer.email}`, 50, 220);
-  if (invoice.customer.gstNumber) doc.text(`GSTIN: ${invoice.customer.gstNumber}`, 50, 235);
+  let billToY = separatorY + 15;
+  doc.fillColor(secondaryColor).font('Helvetica-Bold').fontSize(11).text('BILL TO:', 50, billToY);
+  billToY += 15;
+  
+  doc.fillColor(textColor).font('Helvetica').fontSize(10).text(invoice.customer.name, 50, billToY);
+  billToY += 15;
+  
+  if (invoice.customer.address) {
+    const custAddressHeight = doc.heightOfString(invoice.customer.address, { width: 280 });
+    doc.text(invoice.customer.address, 50, billToY, { width: 280 });
+    billToY += custAddressHeight + 4;
+  }
+  
+  const phoneText = `Phone: ${invoice.customer.phone}`;
+  const phoneHeight = doc.heightOfString(phoneText, { width: 280 });
+  doc.text(phoneText, 50, billToY, { width: 280 });
+  billToY += phoneHeight + 4;
+  
+  if (invoice.customer.email) {
+    const emailText = `Email: ${invoice.customer.email}`;
+    const emailHeight = doc.heightOfString(emailText, { width: 280 });
+    doc.text(emailText, 50, billToY, { width: 280 });
+    billToY += emailHeight + 4;
+  }
+  
+  if (invoice.customer.gstNumber) {
+    const gstText = `GSTIN: ${invoice.customer.gstNumber}`;
+    const gstHeight = doc.heightOfString(gstText, { width: 280 });
+    doc.text(gstText, 50, billToY, { width: 280 });
+    billToY += gstHeight + 4;
+  }
 
   // --- TABLE SECTION ---
-  const tableTop = 270;
+  const tableTop = Math.max(270, billToY + 20);
   
   // Table Header
   doc.rect(50, tableTop, 500, 20).fill(secondaryColor);
