@@ -45,10 +45,25 @@ const generateInvoicePDF = async (invoice, setting, res) => {
   let headerTextY = 75;
   if (logoSource) {
     try {
+      let scaledWidth = 120;
+      let scaledHeight = 40;
+      try {
+        const img = doc.openImage(logoSource);
+        const ratio = Math.min(120 / img.width, 40 / img.height);
+        scaledWidth = img.width * ratio;
+        scaledHeight = img.height * ratio;
+      } catch (err) {
+        console.error('Error opening image for size calculation:', err);
+      }
+
       doc.image(logoSource, 50, 40, { fit: [120, 40] });
+      
+      const textX = 50 + scaledWidth + 10;
+      const textY = 40 + (scaledHeight - 20) / 2; // vertically center font size 20 (approx 20pt height)
+
       // Render brand name next to logo - black text
-      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 185, 48, { align: 'left', width: 200 });
-      headerTextY = 95;
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', textX, textY, { align: 'left', width: 340 - scaledWidth });
+      headerTextY = Math.max(95, 40 + scaledHeight + 15);
     } catch (e) {
       console.error('Error drawing logo image: ', e);
       doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });

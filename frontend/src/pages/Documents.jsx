@@ -3,12 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UploadCloud, FileText, Search, Folder, Trash2, Calendar, File, Download, ExternalLink, HardDrive, Eye, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const INITIAL_DOCS = [
-  { id: '1', name: 'Stark_Industries_Audit_Report.pdf', size: '2.4 MB', type: 'Audit', date: '2026-06-10' },
-  { id: '2', name: 'Acme_Contract_Executed_2026.docx', size: '840 KB', type: 'Contract', date: '2026-06-08' },
-  { id: '3', name: 'Q1_Tax_Form_1040_Draft.pdf', size: '1.2 MB', type: 'Tax', date: '2026-06-12' },
-  { id: '4', name: 'Purchase_Receipt_EZONIX_122.png', size: '420 KB', type: 'Receipt', date: '2026-06-05' }
-];
+const INITIAL_DOCS = [];
 
 const CATEGORIES = ['All', 'Audit', 'Contract', 'Tax', 'Receipt', 'Other'];
 
