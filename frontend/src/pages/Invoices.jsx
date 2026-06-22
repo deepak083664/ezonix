@@ -32,6 +32,7 @@ const Invoices = () => {
   const [invoiceNotes, setInvoiceNotes] = useState('');
   const [invoiceItems, setInvoiceItems] = useState([{ product: '', quantity: 1, taxPercent: 0, discountPercent: 0 }]);
   const [invoiceAmountPaid, setInvoiceAmountPaid] = useState(0);
+  const [invoiceOverallDiscount, setInvoiceOverallDiscount] = useState(0);
 
   // Edit Form State
   const [editStatus, setEditStatus] = useState('');
@@ -77,6 +78,17 @@ const Invoices = () => {
     fetchMetadata();
   }, [searchQuery, statusFilter, page]);
 
+  const openCreateModal = () => {
+    setInvoiceCustomer('');
+    setInvoiceDueDate('');
+    setInvoiceNotes('');
+    const defaultTax = settings?.defaultTaxRate || 18;
+    setInvoiceItems([{ product: '', quantity: 1, taxPercent: defaultTax, discountPercent: 0 }]);
+    setInvoiceAmountPaid(0);
+    setInvoiceOverallDiscount(0);
+    setIsCreateOpen(true);
+  };
+
   // Handle add item row
   const addItemRow = () => {
     const defaultTax = settings?.defaultTaxRate || 18;
@@ -115,8 +127,9 @@ const Invoices = () => {
       }
     });
 
-    const grandTotal = subtotal + taxTotal - discountTotal;
-    const amountDue = Math.max(0, grandTotal - invoiceAmountPaid);
+    const overallDisc = parseFloat(invoiceOverallDiscount || 0);
+    const grandTotal = subtotal + taxTotal - discountTotal - overallDisc;
+    const amountDue = Math.max(0, grandTotal - parseFloat(invoiceAmountPaid || 0));
 
     return {
       subtotal,
@@ -145,6 +158,7 @@ const Invoices = () => {
       dueDate: invoiceDueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 7 days
       notes: invoiceNotes,
       amountPaid: parseFloat(invoiceAmountPaid || 0),
+      overallDiscount: parseFloat(invoiceOverallDiscount || 0),
       items: invoiceItems.map((item) => ({
         product: item.product,
         quantity: parseInt(item.quantity),
@@ -312,30 +326,40 @@ const Invoices = () => {
               </tbody>
             </table>
 
-            <div class="totals">
-              <div class="totals-box">
-                <div class="totals-row">
-                  <span>Discount Total:</span>
-                  <span>-₹${inv.discountTotal.toFixed(2)}</span>
-                </div>
-                <div class="totals-row">
-                  <span>Tax Total:</span>
-                  <span>+₹${inv.taxTotal.toFixed(2)}</span>
-                </div>
-                <div class="totals-row grand-total">
-                  <span>Grand Total:</span>
-                  <span>₹${inv.grandTotal.toFixed(2)}</span>
-                </div>
-                <div class="totals-row" style="margin-top:10px;font-size:12px;color:#64748b;">
-                  <span>Amount Paid:</span>
-                  <span>₹${inv.amountPaid.toFixed(2)}</span>
-                </div>
-                <div class="totals-row" style="font-size:12px;color:#ef4444;font-weight:bold;">
-                  <span>Amount Due:</span>
-                  <span>₹${inv.amountDue.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
+             <div class="totals">
+               <div class="totals-box">
+                 <div class="totals-row">
+                   <span>Subtotal:</span>
+                   <span>₹${(inv.grandTotal + inv.discountTotal - inv.taxTotal).toFixed(2)}</span>
+                 </div>
+                 <div class="totals-row">
+                   <span>Item Discounts:</span>
+                   <span>-₹${(inv.discountTotal - (inv.overallDiscount || 0)).toFixed(2)}</span>
+                 </div>
+                 ${inv.overallDiscount > 0 ? `
+                 <div class="totals-row">
+                   <span>Overall Discount:</span>
+                   <span>-₹${inv.overallDiscount.toFixed(2)}</span>
+                 </div>
+                 ` : ''}
+                 <div class="totals-row">
+                   <span>Tax Total:</span>
+                   <span>+₹${inv.taxTotal.toFixed(2)}</span>
+                 </div>
+                 <div class="totals-row grand-total">
+                   <span>Grand Total:</span>
+                   <span>₹${inv.grandTotal.toFixed(2)}</span>
+                 </div>
+                 <div class="totals-row" style="margin-top:10px;font-size:12px;color:#64748b;">
+                   <span>Amount Paid:</span>
+                   <span>₹${inv.amountPaid.toFixed(2)}</span>
+                 </div>
+                 <div class="totals-row" style="font-size:12px;color:#ef4444;font-weight:bold;">
+                   <span>Amount Due:</span>
+                   <span>₹${inv.amountDue.toFixed(2)}</span>
+                 </div>
+               </div>
+             </div>
 
             ${inv.notes ? `<div style="margin-top:40px;font-size:13px;"><b>Notes:</b><br>${inv.notes}</div>` : ''}
 
@@ -445,7 +469,7 @@ const Invoices = () => {
           </p>
         </div>
         <button
-          onClick={() => setIsCreateOpen(true)}
+          onClick={openCreateModal}
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-all cursor-pointer"
         >
           <Plus size={16} /> Create Invoice
@@ -486,7 +510,7 @@ const Invoices = () => {
             title="No invoices found"
             message="No billing records match filter conditions. Generate one to adjust items."
             actionText="Create Invoice"
-            onAction={() => setIsCreateOpen(true)}
+            onAction={openCreateModal}
           />
         }
       />
@@ -612,8 +636,21 @@ const Invoices = () => {
             </div>
           </div>
 
-          {/* Payment recorded immediately */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Payment and discount recorded immediately */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                Overall Discount (₹)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={invoiceOverallDiscount}
+                onChange={(e) => setInvoiceOverallDiscount(e.target.value)}
+                placeholder="0.00"
+                className="form-input"
+              />
+            </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                 Initial Amount Paid (₹)
@@ -647,12 +684,20 @@ const Invoices = () => {
                 ₹{totals.subtotal.toFixed(2)}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span>Discount Total:</span>
-              <span className="font-semibold text-red-600 dark:text-red-400">
-                -₹{totals.discountTotal.toFixed(2)}
-              </span>
-            </div>
+             <div className="flex justify-between">
+               <span>Item Discounts:</span>
+               <span className="font-semibold text-red-600 dark:text-red-400">
+                 -₹{totals.discountTotal.toFixed(2)}
+               </span>
+             </div>
+             {parseFloat(invoiceOverallDiscount || 0) > 0 && (
+               <div className="flex justify-between">
+                 <span>Overall Discount:</span>
+                 <span className="font-semibold text-red-600 dark:text-red-400">
+                   -₹{parseFloat(invoiceOverallDiscount).toFixed(2)}
+                 </span>
+               </div>
+             )}
             <div className="flex justify-between">
               <span>Tax Total:</span>
               <span className="font-semibold text-slate-800 dark:text-slate-200">

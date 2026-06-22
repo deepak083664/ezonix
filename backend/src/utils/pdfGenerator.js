@@ -112,16 +112,46 @@ const generateInvoicePDF = (invoice, setting, res) => {
   doc.text('Subtotal:', calcX, totalsY, { width: 100, align: 'right' });
   doc.text(`Rs. ${subtotal.toFixed(2)}`, calcValX, totalsY, { width: 80, align: 'right' });
 
+  const itemDiscounts = invoice.discountTotal - (invoice.overallDiscount || 0);
   doc.text('Discount Total:', calcX, totalsY + 15, { width: 100, align: 'right' });
-  doc.text(`-Rs. ${invoice.discountTotal.toFixed(2)}`, calcValX, totalsY + 15, { width: 80, align: 'right' });
+  doc.text(`-Rs. ${itemDiscounts.toFixed(2)}`, calcValX, totalsY + 15, { width: 80, align: 'right' });
 
-  doc.text('Tax Total:', calcX, totalsY + 30, { width: 100, align: 'right' });
-  doc.text(`+Rs. ${invoice.taxTotal.toFixed(2)}`, calcValX, totalsY + 30, { width: 80, align: 'right' });
+  let currentYOffset = totalsY + 30;
+
+  if (invoice.overallDiscount > 0) {
+    doc.text('Overall Discount:', calcX, currentYOffset, { width: 100, align: 'right' });
+    doc.text(`-Rs. ${(invoice.overallDiscount || 0).toFixed(2)}`, calcValX, currentYOffset, { width: 80, align: 'right' });
+    currentYOffset += 15;
+  }
+
+  doc.text('Tax Total:', calcX, currentYOffset, { width: 100, align: 'right' });
+  doc.text(`+Rs. ${invoice.taxTotal.toFixed(2)}`, calcValX, currentYOffset, { width: 80, align: 'right' });
+
+  currentYOffset += 17;
 
   // Grand Total highlight
-  doc.rect(calcX, totalsY + 47, 200, 22).fill(lightBg);
-  doc.fillColor(primaryColor).fontSize(11).text('Grand Total:', calcX + 10, totalsY + 53, { width: 90, align: 'left' });
-  doc.text(`Rs. ${invoice.grandTotal.toFixed(2)}`, calcValX, totalsY + 53, { width: 80, align: 'right' });
+  doc.rect(calcX, currentYOffset, 200, 22).fill(lightBg);
+  doc.fillColor(primaryColor).fontSize(11).text('Grand Total:', calcX + 10, currentYOffset + 6, { width: 90, align: 'left' });
+  doc.text(`Rs. ${invoice.grandTotal.toFixed(2)}`, calcValX, currentYOffset + 6, { width: 80, align: 'right' });
+
+  currentYOffset += 27;
+
+  // Amount Paid and Amount Due
+  doc.fillColor(textColor).fontSize(9);
+  doc.text('Amount Paid:', calcX, currentYOffset, { width: 100, align: 'right' });
+  doc.text(`Rs. ${(invoice.amountPaid || 0).toFixed(2)}`, calcValX, currentYOffset, { width: 80, align: 'right' });
+  
+  currentYOffset += 15;
+
+  const hasDue = invoice.amountDue > 0;
+  if (hasDue) {
+    doc.fillColor('#EF4444').font('Helvetica-Bold');
+  }
+  doc.text('Amount Due:', calcX, currentYOffset, { width: 100, align: 'right' });
+  doc.text(`Rs. ${(invoice.amountDue || 0).toFixed(2)}`, calcValX, currentYOffset, { width: 80, align: 'right' });
+  if (hasDue) {
+    doc.fillColor(textColor).font('Helvetica');
+  }
 
   // --- FOOTER BANNER ---
   doc.fillColor('#94A3B8').fontSize(9).text('Thank you for choosing our business!', 50, 750, { align: 'center', width: 500 });

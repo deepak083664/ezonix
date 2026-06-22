@@ -51,6 +51,10 @@ const invoiceSchema = new mongoose.Schema(
       required: true,
       default: 0,
     },
+    overallDiscount: {
+      type: Number,
+      default: 0,
+    },
     grandTotal: {
       type: Number,
       required: true,

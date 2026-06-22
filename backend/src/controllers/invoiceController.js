@@ -63,7 +63,7 @@ exports.getInvoice = catchAsync(async (req, res, next) => {
 });
 
 exports.createInvoice = catchAsync(async (req, res, next) => {
-  const { customer: customerId, items, dueDate, notes, amountPaid = 0 } = req.body;
+  const { customer: customerId, items, dueDate, notes, amountPaid = 0, overallDiscount = 0 } = req.body;
 
   if (!items || items.length === 0) {
     return next(new AppError('Please add at least one item to the invoice', 400));
@@ -121,7 +121,8 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     await product.save();
   }
 
-  const amountDue = grandTotal - amountPaid;
+  const finalOverallDiscount = parseFloat(overallDiscount || 0);
+  const amountDue = grandTotal - finalOverallDiscount - amountPaid;
   let status = 'pending';
   if (amountDue <= 0) {
     status = 'paid';
@@ -134,8 +135,9 @@ exports.createInvoice = catchAsync(async (req, res, next) => {
     customer: customerId,
     items: itemsSnapshot,
     taxTotal,
-    discountTotal,
-    grandTotal,
+    discountTotal: discountTotal + finalOverallDiscount,
+    overallDiscount: finalOverallDiscount,
+    grandTotal: grandTotal - finalOverallDiscount,
     amountPaid,
     amountDue,
     status,
