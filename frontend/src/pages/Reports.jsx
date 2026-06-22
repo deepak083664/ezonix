@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import API, { BACKEND_URL } from '../services/api';
-import { FileDown, Calendar, FileJson, FileSpreadsheet, ServerCrash } from 'lucide-react';
+import API from '../services/api';
+import { FileDown, Calendar, FileSpreadsheet, Printer } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Reports = () => {
@@ -50,19 +50,169 @@ const Reports = () => {
     }
   };
 
-  const handleExportExcel = () => {
-    const datesParam = `?startDate=${startDate}&endDate=${endDate}`;
-    const url = `${BACKEND_URL}/api/v1/reports/${reportType}/excel${datesParam}`;
-    window.open(url, '_blank');
-    toast.success('Downloading Excel Report sheet...');
+  const handleExportExcel = async () => {
+    const loadingToast = toast.loading('Generating Excel Report sheet...');
+    try {
+      const datesParam = `?startDate=${startDate}&endDate=${endDate}`;
+      const response = await API.get(`/reports/${reportType}/excel${datesParam}`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${reportType}_report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.dismiss(loadingToast);
+      toast.success('Excel Report sheet downloaded successfully!');
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      console.error('Failed to export Excel report', err);
+      toast.error('Failed to export Excel report');
+    }
   };
 
   // Bulk Export Handlers
-  const handleBulkExport = (format) => {
-    const endpoint = format === 'excel' ? 'excel' : 'json';
-    const url = `${BACKEND_URL}/api/v1/reports/export/${endpoint}`;
-    window.open(url, '_blank');
-    toast.success(`Exporting complete business database in ${format.toUpperCase()} format...`);
+  const handleBulkExport = async (format) => {
+    const loadingToast = toast.loading(`Generating complete business database export in ${format.toUpperCase()} format...`);
+    try {
+      const endpoint = format === 'excel' ? 'excel' : 'json';
+      const response = await API.get(`/reports/export/${endpoint}`, {
+        responseType: 'blob',
+      });
+      
+      const contentType = format === 'excel' 
+        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+        : 'application/json';
+      const fileExtension = format === 'excel' ? 'xlsx' : 'json';
+
+      const blob = new Blob([response.data], { type: contentType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `business_database_export_${new Date().toISOString().split('T')[0]}.${fileExtension}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.dismiss(loadingToast);
+      toast.success(`Business database export in ${format.toUpperCase()} completed successfully!`);
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      console.error(`Failed to export complete business database in ${format.toUpperCase()}`, err);
+      toast.error(`Failed to export complete business database in ${format.toUpperCase()}`);
+    }
+  };
+
+  const handlePrintPDF = () => {
+    toast.loading('Preparing Print PDF Layout...', { duration: 1000 });
+    
+    const printWindow = window.open('', '_blank');
+    
+    const formattedStartDate = startDate ? new Date(startDate).toLocaleDateString() : 'Beginning';
+    const formattedEndDate = endDate ? new Date(endDate).toLocaleDateString() : 'Present';
+    
+    const reportTitleMap = {
+      sales: 'Sales Invoice Ledger',
+      expenses: 'Operating Expenses Report',
+      purchases: 'Procurement Intake Report',
+      incomes: 'General Inward Inflows Report'
+    };
+    
+    const reportTitle = reportTitleMap[reportType] || 'Financial Report';
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${reportTitle} - ${new Date().toLocaleDateString()}</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; color: #334155; padding: 40px; margin: 0; line-height: 1.5; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
+            .title { font-size: 24px; font-weight: bold; color: #1e293b; }
+            .subtitle { font-size: 14px; color: #64748b; margin-top: 5px; }
+            .meta { font-size: 12px; text-align: right; line-height: 1.6; }
+            .summary-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 30px; }
+            .card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; }
+            .card-label { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; tracking-wider: 1px; }
+            .card-value { font-size: 20px; font-weight: 800; margin-top: 5px; }
+            .card-value.amount { color: #2563eb; }
+            table { width: 100%; border-collapse: collapse; margin-top: 40px; }
+            th { background-color: #1e293b; color: white; padding: 12px 10px; text-align: left; font-size: 12px; text-transform: uppercase; }
+            td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+            .text-right { text-align: right; }
+            .footer { margin-top: 60px; text-align: center; color: #94a3b8; font-size: 11px; }
+            @media print { body { padding: 0; } }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="title">${reportTitle}</div>
+              <div class="subtitle">Period: ${formattedStartDate} to ${formattedEndDate}</div>
+            </div>
+            <div class="meta">
+              Report Generated On:<br>
+              <b>${new Date().toLocaleString()}</b>
+            </div>
+          </div>
+
+          <div class="summary-cards">
+            <div class="card">
+              <div class="card-label">Total Log Count</div>
+              <div class="card-value">${totals.count} Entries</div>
+            </div>
+            <div class="card">
+              <div class="card-label">Sum Aggregate Total</div>
+              <div class="card-value amount">₹${totals.sum.toFixed(2)}</div>
+            </div>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Reference / ID</th>
+                <th>Date</th>
+                <th>Additional Details</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              \${records
+                .map((row) => {
+                  const ref = row.invoiceNumber || row.category || row.supplierName || row.incomeSource?.name || 'N/A';
+                  const dateStr = new Date(row.issueDate || row.date || row.purchaseDate).toLocaleDateString();
+                  const desc = row.customer?.name || row.description || \`Procurement Items: \${row.items?.length || 0}\`;
+                  const amt = row.grandTotal || row.amount || 0;
+                  return \`
+                    <tr>
+                      <td><b>\${ref}</b></td>
+                      <td>\${dateStr}</td>
+                      <td>\${desc}</td>
+                      <td class="text-right">₹\${amt.toFixed(2)}</td>
+                    </tr>
+                  \`;
+                })
+                .join('')}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            End of compiled report document. Generated dynamically via Ezonix Platform.
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+              window.onafterprint = function() { window.close(); };
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   return (
@@ -144,6 +294,14 @@ const Reports = () => {
           >
             <FileDown size={18} />
           </button>
+          <button
+            onClick={handlePrintPDF}
+            disabled={records.length === 0}
+            title="Print PDF Report"
+            className="rounded-lg border border-slate-200 p-2.5 text-red-600 hover:bg-red-50 disabled:opacity-40 dark:border-slate-700 dark:text-red-450 dark:hover:bg-red-955/20 cursor-pointer"
+          >
+            <Printer size={18} />
+          </button>
         </div>
       </div>
 
@@ -163,12 +321,6 @@ const Reports = () => {
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-700 transition-all cursor-pointer shadow-sm"
           >
             <FileSpreadsheet size={16} /> Export Complete Excel (.xlsx)
-          </button>
-          <button
-            onClick={() => handleBulkExport('json')}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-350 dark:hover:bg-slate-700 transition-all cursor-pointer shadow-sm"
-          >
-            <FileJson size={16} /> Export Complete JSON (.json)
           </button>
         </div>
       </div>

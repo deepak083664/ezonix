@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, FileText, Search, Folder, Trash2, Calendar, File, Download, ExternalLink, HardDrive } from 'lucide-react';
+import { UploadCloud, FileText, Search, Folder, Trash2, Calendar, File, Download, ExternalLink, HardDrive, Eye, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const INITIAL_DOCS = [
@@ -21,6 +21,7 @@ const Documents = () => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [uploading, setUploading] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('crm_documents', JSON.stringify(docs));
@@ -56,8 +57,9 @@ const Documents = () => {
     setUploading(true);
     toast.loading('Uploading document...', { id: 'upload_toast' });
 
-    // Simulate upload progress
-    setTimeout(() => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const fileDataUrl = reader.result;
       const newDoc = {
         id: Date.now().toString(),
         name: file.name,
@@ -65,12 +67,18 @@ const Documents = () => {
           ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` 
           : `${(file.size / 1024).toFixed(0)} KB`,
         type: file.name.endsWith('.pdf') ? 'Audit' : file.name.endsWith('.docx') ? 'Contract' : 'Other',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        url: fileDataUrl
       };
       setDocs([newDoc, ...docs]);
       setUploading(false);
       toast.success('Document uploaded successfully!', { id: 'upload_toast' });
-    }, 1500);
+    };
+    reader.onerror = () => {
+      setUploading(false);
+      toast.error('Failed to read file contents', { id: 'upload_toast' });
+    };
+    reader.readAsDataURL(file);
   };
 
   const deleteDoc = (id) => {
@@ -80,8 +88,74 @@ const Documents = () => {
     }
   };
 
-  const handleDownload = (name) => {
-    toast.success(`Downloading ${name} in progress...`);
+  const getDocUrl = (doc) => {
+    if (doc.url) return doc.url;
+    
+    // Fallback/Generate dummy file for mock documents
+    let content = '';
+    let mimeType = 'text/plain';
+    
+    if (doc.name.endsWith('.pdf')) {
+      content = `%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>>>>>endobj\n4 0 obj<</Length 56>>stream\nBT\n/F1 12 Tf\n50 700 Td\n(Mock Document: ${doc.name}) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f\n0000000009 00000 n\n0000000052 00000 n\n0000000101 00000 n\n0000000250 00000 n\ntrailer<</Size 5/Root 1 0 R>>\nstartxref\n356\n%%EOF`;
+      mimeType = 'application/pdf';
+    } else if (doc.name.endsWith('.docx')) {
+      content = `Mock Microsoft Word Document Content for: ${doc.name}`;
+      mimeType = 'text/plain';
+    } else if (doc.name.endsWith('.png') || doc.name.endsWith('.jpg')) {
+      content = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+      return content;
+    } else {
+      content = `Mock content for document: ${doc.name}`;
+      mimeType = 'text/plain';
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    return URL.createObjectURL(blob);
+  };
+
+  const handleDownload = (doc) => {
+    toast.success(`Downloading ${doc.name}...`);
+    const url = getDocUrl(doc);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', doc.name);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const renderPreviewContent = (doc) => {
+    const isImage = doc.name.match(/\.(png|jpe?g|gif|webp)$/i);
+    const isPdf = doc.name.endsWith('.pdf');
+    const url = getDocUrl(doc);
+
+    if (isImage) {
+      return (
+        <img src={url} alt={doc.name} className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md border border-slate-200 dark:border-slate-800" />
+      );
+    } else if (isPdf) {
+      return (
+        <iframe src={url} title={doc.name} className="w-full h-[60vh] rounded-xl border-0 bg-white" />
+      );
+    } else {
+      return (
+        <div className="flex flex-col items-center justify-center p-8 text-center text-slate-400">
+          <FileText size={64} className="text-slate-350 dark:text-slate-700 mb-4 animate-bounce" />
+          <h4 className="text-sm font-bold text-slate-850 dark:text-slate-200 mb-1">
+            Preview Not Supported
+          </h4>
+          <p className="text-xs text-slate-400 mb-4 max-w-xs">
+            We don't support previewing {doc.name.split('.').pop().toUpperCase()} files in the browser yet. Please download the file to view its contents.
+          </p>
+          <button
+            onClick={() => handleDownload(doc)}
+            className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-hover shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Download size={14} /> Download File
+          </button>
+        </div>
+      );
+    }
   };
 
   const filteredDocs = docs.filter(d => {
@@ -179,7 +253,7 @@ const Documents = () => {
                 </div>
 
                 {/* Name */}
-                <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200 line-clamp-2 hover:text-primary transition-colors cursor-pointer" title={doc.name}>
+                <h3 onClick={() => setPreviewDoc(doc)} className="font-bold text-sm text-slate-800 dark:text-slate-200 line-clamp-2 hover:text-primary transition-colors cursor-pointer" title={doc.name}>
                   {doc.name}
                 </h3>
               </div>
@@ -196,7 +270,14 @@ const Documents = () => {
                 {/* Actions */}
                 <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => handleDownload(doc.name)}
+                    onClick={() => setPreviewDoc(doc)}
+                    title="Preview File"
+                    className="p-1.5 rounded-lg border border-slate-250 text-slate-400 hover:text-primary hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-950 transition-colors"
+                  >
+                    <Eye size={13} />
+                  </button>
+                  <button
+                    onClick={() => handleDownload(doc)}
                     title="Download File"
                     className="p-1.5 rounded-lg border border-slate-250 text-slate-400 hover:text-primary hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-950 transition-colors"
                   >
@@ -223,6 +304,53 @@ const Documents = () => {
           </div>
         )}
       </div>
+
+      {/* Preview Modal */}
+      <AnimatePresence>
+        {previewDoc && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-4xl h-[85vh] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+                <div>
+                  <h3 className="font-bold text-slate-900 dark:text-white truncate max-w-md">
+                    {previewDoc.name}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Size: {previewDoc.size} | Date: {previewDoc.date}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDownload(previewDoc)}
+                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors cursor-pointer"
+                    title="Download File"
+                  >
+                    <Download size={16} />
+                  </button>
+                  <button
+                    onClick={() => setPreviewDoc(null)}
+                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors cursor-pointer"
+                    title="Close Preview"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="flex-1 overflow-auto bg-slate-100 dark:bg-slate-950 p-6 flex items-center justify-center">
+                {renderPreviewContent(previewDoc)}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

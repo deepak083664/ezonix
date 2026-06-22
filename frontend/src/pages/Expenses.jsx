@@ -8,6 +8,8 @@ import { useForm } from 'react-hook-form';
 import { Plus, Edit, Trash2, Receipt, Image as ImageIcon, Download, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const STANDARD_CATEGORIES = ['Rent', 'Salary', 'Internet', 'Marketing'];
+
 const Expenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,8 +29,11 @@ const Expenses = () => {
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors },
   } = useForm();
+
+  const watchedCategory = watch('category');
 
   const fetchExpenses = async () => {
     setLoading(true);
@@ -49,8 +54,9 @@ const Expenses = () => {
   }, [searchQuery, categoryFilter, page]);
 
   const handleCreateOrUpdate = async (data) => {
+    const finalCategory = data.category === 'Other' ? data.customCategory : data.category;
     const formData = new FormData();
-    formData.append('category', data.category);
+    formData.append('category', finalCategory);
     formData.append('amount', data.amount);
     formData.append('description', data.description || '');
     if (data.date) formData.append('date', data.date);
@@ -91,7 +97,9 @@ const Expenses = () => {
     setSelectedExpense(expense);
     setReceiptFile(null);
     if (expense) {
-      setValue('category', expense.category);
+      const isStandard = STANDARD_CATEGORIES.includes(expense.category);
+      setValue('category', isStandard ? expense.category : 'Other');
+      setValue('customCategory', isStandard ? '' : expense.category);
       setValue('amount', expense.amount);
       setValue('description', expense.description);
       setValue('date', expense.date ? new Date(expense.date).toISOString().split('T')[0] : '');
@@ -158,6 +166,15 @@ const Expenses = () => {
     },
   ];
 
+  const customCategoriesInList = expenses
+    .map(e => e.category)
+    .filter(cat => cat && !STANDARD_CATEGORIES.includes(cat) && cat !== 'Other');
+
+  const uniqueCustomCategories = [...new Set([
+    ...customCategoriesInList,
+    ...(categoryFilter && !STANDARD_CATEGORIES.includes(categoryFilter) && categoryFilter !== 'Other' ? [categoryFilter] : [])
+  ])];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -191,6 +208,9 @@ const Expenses = () => {
             <option value="Salary">Salary</option>
             <option value="Internet">Internet</option>
             <option value="Marketing">Marketing</option>
+            {uniqueCustomCategories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
             <option value="Other">Other</option>
           </select>
         </div>
@@ -241,6 +261,23 @@ const Expenses = () => {
                 <option value="Other">Other</option>
               </select>
               {errors.category && <span className="text-xs text-red-500">{errors.category.message}</span>}
+
+              {watchedCategory === 'Other' && (
+                <div className="mt-3">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                    Specify Custom Category *
+                  </label>
+                  <input
+                    type="text"
+                    {...register('customCategory', {
+                      required: watchedCategory === 'Other' ? 'Custom category is required' : false,
+                    })}
+                    placeholder="e.g. Travel, Printing, Electricity"
+                    className="form-input"
+                  />
+                  {errors.customCategory && <span className="text-xs text-red-500">{errors.customCategory.message}</span>}
+                </div>
+              )}
             </div>
 
             <div>

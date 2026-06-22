@@ -151,7 +151,7 @@ const Leads = () => {
           />
         </div>
         <div className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          Total Value: <span className="font-bold text-slate-900 dark:text-white">${filteredLeads.reduce((acc, curr) => acc + curr.value, 0).toLocaleString()}</span>
+          Total Value: <span className="font-bold text-slate-900 dark:text-white">₹{filteredLeads.reduce((acc, curr) => acc + curr.value, 0).toLocaleString()}</span>
         </div>
       </div>
 
@@ -172,8 +172,8 @@ const Leads = () => {
                   <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">{col.name}</h3>
                   <span className="text-xs text-slate-400 font-semibold">{colLeads.length} lead{colLeads.length !== 1 ? 's' : ''}</span>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-350">
-                  ${colValue.toLocaleString()}
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-355">
+                  ₹{colValue.toLocaleString()}
                 </span>
               </div>
 
@@ -237,7 +237,7 @@ const Leads = () => {
 
                       <div className="mt-3.5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <span className="text-sm font-extrabold text-slate-900 dark:text-white">
-                          ${lead.value.toLocaleString()}
+                          ₹{lead.value.toLocaleString()}
                         </span>
                         
                         {/* Quick stage mover */}
@@ -310,7 +310,7 @@ const Leads = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Estimated Value ($)</label>
+                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">Estimated Value (₹)</label>
                     <input
                       type="number"
                       value={formValue}

@@ -316,7 +316,7 @@ const LandingPage = () => {
                     <h3 className="text-sm sm:text-lg lg:text-xl font-extrabold text-white mb-1.5 sm:mb-2">{plan.name}</h3>
                     <p className="text-[10px] sm:text-xs text-slate-400 mb-4 sm:mb-6 font-light leading-normal">{plan.description}</p>
                     <div className="flex items-baseline gap-1 mb-4 sm:mb-8">
-                      <span className="text-2xl sm:text-4xl font-black text-white">${plan.price}</span>
+                      <span className="text-2xl sm:text-4xl font-black text-white">₹{plan.price}</span>
                       <span className="text-[10px] sm:text-sm text-slate-400 font-medium capitalize">/{plan.billingCycle}</span>
                     </div>
 

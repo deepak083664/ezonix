@@ -190,9 +190,28 @@ const Invoices = () => {
     }
   };
 
-  const downloadPDF = (invoiceId, invoiceNum) => {
-    toast.loading('Generating PDF...', { duration: 1500 });
-    window.open(`${BACKEND_URL}/api/v1/invoices/${invoiceId}/pdf`, '_blank');
+  const downloadPDF = async (invoiceId, invoiceNum) => {
+    const loadingToast = toast.loading('Generating PDF...');
+    try {
+      const response = await API.get(`/invoices/${invoiceId}/pdf`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice-${invoiceNum}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.dismiss(loadingToast);
+      toast.success('Invoice downloaded successfully!');
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      console.error('Failed to download invoice PDF', err);
+      toast.error('Failed to download invoice PDF');
+    }
   };
 
   const printInvoice = async (invId) => {
