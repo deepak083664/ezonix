@@ -423,9 +423,9 @@ const LandingPage = () => {
               </a>
             </p>
           </div>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-slate-350 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-350 transition-colors">Terms of Service</a>
+          <div className="flex gap-6 text-sm">
+            <Link to="/privacy-policy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
+            <Link to="/terms-of-service" className="hover:text-blue-400 transition-colors">Terms of Service</Link>
           </div>
         </div>
       </footer>

@@ -27,6 +27,10 @@ const Settings = React.lazy(() => import('./pages/Settings'));
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 
+// New Legal Pages (Lazy Loaded)
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
+
 // New Mock SaaS views (Lazy Loaded)
 const Leads = React.lazy(() => import('./pages/Leads'));
 const Tasks = React.lazy(() => import('./pages/Tasks'));
@@ -163,6 +167,10 @@ const App = () => {
               
               {/* Public Auth Routes */}
               <Route path="/login" element={<Login />} />
+
+              {/* Public Legal Pages */}
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} />
 
               {/* Protected CRM Dashboard Layout */}
               <Route path="/app/*" element={<ProtectedLayout />} />
