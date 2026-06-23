@@ -424,6 +424,7 @@ const LandingPage = () => {
             </p>
           </div>
           <div className="flex gap-6 text-sm">
+            <Link to="/about" className="hover:text-blue-400 transition-colors">About Us</Link>
             <Link to="/privacy-policy" className="hover:text-blue-400 transition-colors">Privacy Policy</Link>
             <Link to="/terms-of-service" className="hover:text-blue-400 transition-colors">Terms of Service</Link>
           </div>

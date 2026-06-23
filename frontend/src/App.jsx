@@ -30,6 +30,7 @@ const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 // New Legal Pages (Lazy Loaded)
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = React.lazy(() => import('./pages/TermsOfService'));
+const About = React.lazy(() => import('./pages/About'));
 
 // New Mock SaaS views (Lazy Loaded)
 const Leads = React.lazy(() => import('./pages/Leads'));
@@ -169,6 +170,7 @@ const App = () => {
               <Route path="/login" element={<Login />} />
 
               {/* Public Legal Pages */}
+              <Route path="/about" element={<About />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} />
 
