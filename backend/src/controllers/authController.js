@@ -9,6 +9,11 @@ const https = require('https');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const adminEmails = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map(email => email.trim())
+  .filter(Boolean);
+
 const verifyGoogleTokenFallback = (credential) => {
   return new Promise((resolve, reject) => {
     const url = `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`;
@@ -33,7 +38,7 @@ const verifyGoogleTokenFallback = (credential) => {
 };
 
 const signToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET || 'fallback-secret-key-123456', {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '30d',
   });
 };
@@ -59,7 +64,7 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
   let googleId, email, name, avatar;
 
   // Developer bypass check for local testing / offline runs
-  if (credential === 'dev-bypass-admin') {
+  if (process.env.NODE_ENV === 'development' && credential === 'dev-bypass-admin') {
     googleId = 'dev-bypass-999';
     email = 'ezonix3@gmail.com';
     name = 'Ezonix Main Admin';
@@ -101,7 +106,7 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
         logger.info(`Google token verification succeeded via fallback tokeninfo API for: ${email}`);
       } catch (fallbackErr) {
         logger.error('Google fallback tokeninfo verification failed:', fallbackErr);
-        return next(new AppError(`Google authentication failed. (Internal error: ${err.message}. Fallback error: ${fallbackErr.message})`, 400));
+        return next(new AppError('Google authentication failed. Please try again.', 400));
       }
     }
   }
@@ -112,7 +117,7 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
   const userCount = await User.countDocuments();
   let isNew = false;
 
-  if (credential === 'dev-bypass-admin') {
+  if (process.env.NODE_ENV === 'development' && credential === 'dev-bypass-admin') {
     if (!user) {
       user = await User.create({
         name,
@@ -130,7 +135,7 @@ exports.googleLogin = catchAsync(async (req, res, next) => {
       user.role = 'admin';
       await user.save();
     }
-  } else if (['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(email)) {
+  } else if (adminEmails.includes(email)) {
     if (!user) {
       user = await User.create({
         name,
@@ -205,7 +210,7 @@ exports.verifyAdminKey = catchAsync(async (req, res, next) => {
     return next(new AppError('Security key is required', 400));
   }
 
-  const correctKey = process.env.ADMIN_PANEL_KEY || 'ezonix@2026';
+  const correctKey = process.env.ADMIN_PANEL_KEY;
 
   if (key !== correctKey) {
     return next(new AppError('Incorrect admin password.', 401));

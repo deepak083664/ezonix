@@ -17,7 +17,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   // 2) Verification of token
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET || 'fallback-secret-key-123456');
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
@@ -53,21 +53,6 @@ exports.verifyAccountStatus = (req, res, next) => {
 };
 
 exports.verifySubscription = catchAsync(async (req, res, next) => {
-  // Admins bypass subscription checks
-  if (req.user.role === 'admin') {
-    return next();
-  }
-
-  // Search active subscription
-  const activeSub = await Subscription.findOne({
-    userId: req.user._id,
-    status: 'active',
-    expiryDate: { $gt: new Date() },
-  });
-
-  if (!activeSub) {
-    return next(new AppError('Your subscription is not active. Please contact your administrator.', 403));
-  }
-
+  // Subscription checks bypassed globally
   next();
 });

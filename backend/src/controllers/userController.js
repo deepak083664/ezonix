@@ -76,7 +76,10 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   }
 
   // Prevent demoting or deactivating permanent admins
-  const permanentAdmins = ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'];
+  const permanentAdmins = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map(email => email.trim())
+    .filter(Boolean);
   if (permanentAdmins.includes(userToUpdate.email)) {
     if (req.body.active === false || (req.body.role && req.body.role !== 'admin')) {
       return next(new AppError('This is a permanent administrator account and cannot be demoted or deactivated.', 400));
@@ -111,7 +114,10 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
   }
 
   // Prevent deleting permanent admins
-  const permanentAdmins = ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'];
+  const permanentAdmins = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map(email => email.trim())
+    .filter(Boolean);
   if (permanentAdmins.includes(userToDelete.email)) {
     return next(new AppError('You cannot delete a permanent administrator account.', 400));
   }

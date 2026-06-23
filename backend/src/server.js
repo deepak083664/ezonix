@@ -7,6 +7,25 @@ process.on('uncaughtException', (err) => {
 });
 
 require('dotenv').config();
+
+// Validate process.env.JWT_SECRET exists
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.trim() === "") {
+  logger.error("FATAL: JWT_SECRET environment variable is missing.");
+  process.exit(1);
+}
+
+// Validate process.env.ADMIN_PANEL_KEY exists
+if (!process.env.ADMIN_PANEL_KEY || process.env.ADMIN_PANEL_KEY.trim() === "") {
+  logger.error("FATAL: ADMIN_PANEL_KEY environment variable is missing.");
+  process.exit(1);
+}
+
+// Validate process.env.ADMIN_EMAILS exists
+if (!process.env.ADMIN_EMAILS || process.env.ADMIN_EMAILS.trim() === "") {
+  logger.error("FATAL: ADMIN_EMAILS environment variable is missing.");
+  process.exit(1);
+}
+
 const connectDB = require('./config/db');
 const app = require('./app');
 

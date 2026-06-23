@@ -20,8 +20,10 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const AdminDashboard = () => {
+  const { user: currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(true);
 
@@ -50,16 +52,12 @@ const AdminDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [usersRes, plansRes, subsRes, cmsRes] = await Promise.all([
+      const [usersRes, cmsRes] = await Promise.all([
         API.get('/users'),
-        API.get('/plans'),
-        API.get('/subscriptions'),
         API.get('/website-content')
       ]);
 
       setUsers(usersRes.data.data.users || []);
-      setPlans(plansRes.data.data.plans || []);
-      setSubscriptions(subsRes.data.data.subscriptions || []);
       
       const content = cmsRes.data.data.content || {};
       setCmsContent(content);
@@ -268,8 +266,6 @@ const AdminDashboard = () => {
       <div className="flex border-b border-slate-200 dark:border-slate-850 gap-6 text-xs sm:text-sm overflow-x-auto pb-px">
         {[
           { id: 'users', label: 'Users & Invites', icon: Users },
-          { id: 'plans', label: 'Plans & Pricing', icon: Coins },
-          { id: 'subscriptions', label: 'Subscriptions', icon: CreditCard },
           { id: 'website', label: 'Landing CMS', icon: Globe },
           { id: 'analytics', label: 'Analytics HUD', icon: BarChart3 },
           { id: 'permissions', label: 'Roles Matrix', icon: ShieldAlert }
@@ -322,7 +318,9 @@ const AdminDashboard = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-750 dark:text-slate-300">
                 {users.map((u) => {
+                  const isSelf = u._id === currentUser?._id;
                   const isPermanentAdmin = ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(u.email);
+                  const isProtected = isSelf || isPermanentAdmin;
                   return (
                     <tr key={u._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-850/20">
                       <td className="py-3.5 px-4 font-semibold">
@@ -341,6 +339,11 @@ const AdminDashboard = () => {
                         }`}>
                           {isPermanentAdmin ? 'Permanent Admin' : u.role}
                         </span>
+                        {isSelf && (
+                          <span className="ml-1.5 inline-flex px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-bold lowercase">
+                            you
+                          </span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <span className={`inline-flex items-center gap-1 font-bold ${
@@ -352,10 +355,10 @@ const AdminDashboard = () => {
                       </td>
                       <td className="py-3.5 px-4">
                         <button 
-                          onClick={() => !isPermanentAdmin && handleToggleUserActive(u)}
-                          disabled={isPermanentAdmin}
+                          onClick={() => !isProtected && handleToggleUserActive(u)}
+                          disabled={isProtected}
                           className={`inline-flex items-center gap-1 p-1 rounded-lg transition-all font-bold ${
-                            isPermanentAdmin
+                            isProtected
                               ? 'text-green-500 opacity-60 cursor-not-allowed'
                               : u.active 
                               ? 'text-green-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer' 
@@ -375,7 +378,7 @@ const AdminDashboard = () => {
                           >
                             <Edit size={14} />
                           </button>
-                          {!isPermanentAdmin && (
+                          {!isProtected && (
                             <button 
                               onClick={() => handleDeleteUser(u._id)}
                               className="p-1 text-slate-400 hover:text-red-500 cursor-pointer"
@@ -389,147 +392,6 @@ const AdminDashboard = () => {
                     </tr>
                   );
                 })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* --- PLANS TAB --- */}
-      {activeTab === 'plans' && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white">CRM Subscription Plans</h2>
-            <button 
-              onClick={() => {
-                setPlanForm({ id: null, name: '', description: '', price: 0, billingCycle: 'monthly', features: '', isActive: true, sortOrder: 0 });
-                setShowPlanModal(true);
-              }}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 py-2 px-4 text-xs font-bold text-white shadow-md cursor-pointer"
-            >
-              <Plus size={14} /> Add Plan
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {plans.map((p) => (
-              <div 
-                key={p._id}
-                className={`rounded-2xl border bg-white dark:bg-slate-900 p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-all ${
-                  p.isActive ? 'border-slate-200 dark:border-slate-800' : 'border-red-500/30 border-dashed'
-                }`}
-              >
-                <div>
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-base font-extrabold text-slate-900 dark:text-white">{p.name}</h3>
-                    <div className="flex gap-1.5">
-                      <button onClick={() => openEditPlan(p)} className="text-slate-400 hover:text-primary"><Edit size={14} /></button>
-                      <button onClick={() => handleDeletePlan(p._id)} className="text-slate-400 hover:text-red-500"><Trash2 size={14} /></button>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500 font-light leading-relaxed mb-4">{p.description}</p>
-                  <div className="text-2xl font-black text-slate-850 dark:text-white mb-6">
-                    ₹{p.price} <span className="text-xs font-medium text-slate-400">/{p.billingCycle}</span>
-                  </div>
-                  <ul className="space-y-2 mb-6 text-xs text-slate-650 dark:text-slate-355 font-light">
-                    {p.features.map((feat, fidx) => (
-                      <li key={fidx} className="flex items-center gap-2">
-                        <Check size={12} className="text-blue-500" /> {feat}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-850 pt-4 text-xs font-bold">
-                  <span className="text-slate-400">Sort Index: {p.sortOrder}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] ${
-                    p.isActive ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'
-                  }`}>
-                    {p.isActive ? 'Enabled' : 'Disabled'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* --- SUBSCRIPTIONS TAB --- */}
-      {activeTab === 'subscriptions' && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white">All Subscriptions Logs</h2>
-            <button 
-              onClick={() => {
-                setSubForm({ id: null, userId: '', planId: '', startDate: '', expiryDate: '', status: 'active', paymentStatus: 'paid' });
-                setShowSubModal(true);
-              }}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 py-2 px-4 text-xs font-bold text-white shadow-md cursor-pointer"
-            >
-              <Plus size={14} /> Allocate Plan
-            </button>
-          </div>
-
-          <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-500 uppercase font-black border-b border-slate-100 dark:border-slate-800">
-                <tr>
-                  <th className="py-3 px-4">User Details</th>
-                  <th className="py-3 px-4">Current Plan</th>
-                  <th className="py-3 px-4">Billing Dates</th>
-                  <th className="py-3 px-4">Plan Status</th>
-                  <th className="py-3 px-4">Payment</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-750 dark:text-slate-300">
-                {subscriptions.map((s) => (
-                  <tr key={s._id} className="hover:bg-slate-55/20">
-                    <td className="py-3.5 px-4">
-                      {s.userId ? (
-                        <>
-                          <div className="font-bold text-slate-900 dark:text-white">{s.userId.name}</div>
-                          <div className="text-[10px] text-slate-450">{s.userId.email}</div>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 italic">Deleted User</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {s.planId ? (
-                        <>
-                          <div className="font-bold text-slate-900 dark:text-white">{s.planId.name}</div>
-                          <div className="text-[10px] text-slate-450">₹{s.planId.price} / {s.planId.billingCycle}</div>
-                        </>
-                      ) : (
-                        <span className="text-slate-400 italic">Custom Plan</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 font-light text-[10px] leading-relaxed">
-                      <div><b>Start:</b> {new Date(s.startDate).toLocaleDateString()}</div>
-                      <div><b>Expiry:</b> {new Date(s.expiryDate).toLocaleDateString()}</div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold capitalize ${
-                        s.status === 'active' 
-                          ? 'bg-green-500/10 text-green-500' 
-                          : s.status === 'expired'
-                          ? 'bg-red-500/10 text-red-500'
-                          : 'bg-amber-500/10 text-amber-500'
-                      }`}>
-                        {s.status}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="capitalize font-semibold">{s.paymentStatus}</span>
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => openEditSub(s)} className="p-1 text-slate-400 hover:text-primary"><Edit size={14} /></button>
-                        <button onClick={() => handleDeleteSub(s._id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 size={14} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
               </tbody>
             </table>
           </div>
@@ -687,60 +549,35 @@ const AdminDashboard = () => {
 
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
               <div className="flex justify-between items-start mb-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Active Subscriptions</span>
-                <CreditCard className="text-green-500" size={16} />
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Active Accounts</span>
+                <UserCheck className="text-green-500" size={16} />
               </div>
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {subscriptions.filter(s => s.status === 'active').length}
+                {users.filter(u => u.active).length}
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 font-light">With current unexpired licenses</p>
+              <p className="text-[10px] text-slate-400 mt-1 font-light">Enabled & active users</p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
               <div className="flex justify-between items-start mb-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">MRR (Projected)</span>
-                <Coins className="text-yellow-500" size={16} />
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Pending Invites</span>
+                <Calendar className="text-yellow-500" size={16} />
               </div>
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                ₹{subscriptions
-                  .filter(s => s.status === 'active' && s.planId)
-                  .reduce((acc, curr) => acc + (curr.planId?.price || 0), 0)
-                }
+                {users.filter(u => !u.googleId).length}
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 font-light">Monthly Recurring Revenue</p>
+              <p className="text-[10px] text-slate-400 mt-1 font-light">Awaiting Google login</p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
               <div className="flex justify-between items-start mb-4">
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Plans Available</span>
-                <FileText className="text-red-500" size={16} />
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Administrators</span>
+                <ShieldAlert className="text-red-500" size={16} />
               </div>
               <div className="text-3xl font-black text-slate-900 dark:text-white">
-                {plans.filter(p => p.isActive).length}
+                {users.filter(u => u.role === 'admin').length}
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 font-light">Enabled pricing tiers</p>
-            </div>
-          </div>
-
-          {/* Revenue distribution mock breakdown */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-            <h3 className="text-sm font-bold mb-4">Subscription Distribution Matrix</h3>
-            <div className="space-y-4">
-              {plans.map((p) => {
-                const count = subscriptions.filter(s => s.status === 'active' && s.planId?._id === p._id).length;
-                const pct = users.length > 0 ? (count / users.length) * 100 : 0;
-                return (
-                  <div key={p._id} className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold">
-                      <span>{p.name} (₹{p.price}/{p.billingCycle})</span>
-                      <span>{count} Subscriptions ({pct.toFixed(0)}%)</span>
-                    </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-950 h-2 rounded-full overflow-hidden">
-                      <div className="bg-blue-500 h-full" style={{ width: `${pct}%` }}></div>
-                    </div>
-                  </div>
-                );
-              })}
+              <p className="text-[10px] text-slate-400 mt-1 font-light">With full platform control</p>
             </div>
           </div>
         </div>
@@ -826,41 +663,27 @@ const AdminDashboard = () => {
                 <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Security Access Role</label>
                 <select
                   value={userForm.role}
-                  disabled={['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email)}
+                  disabled={userForm.email === currentUser?.email || ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email)}
                   onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
                   className={`w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none ${
-                    ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email) ? 'opacity-65 cursor-not-allowed' : ''
+                    (userForm.email === currentUser?.email || ['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email)) ? 'opacity-65 cursor-not-allowed' : ''
                   }`}
                 >
                   <option value="staff">Staff</option>
                   <option value="manager">Manager</option>
                   <option value="admin">Administrator</option>
                 </select>
+                {userForm.email === currentUser?.email && (
+                  <p className="text-[9px] text-amber-500 mt-1 font-semibold">
+                    * This is your own administrator account. The security role is locked to prevent lockout.
+                  </p>
+                )}
                 {['ezonix3@gmail.com', 'ganu9955171746@gmail.com'].includes(userForm.email) && (
                   <p className="text-[9px] text-purple-400 mt-1 font-semibold">
                     * This is a permanent administrator account. The security role is locked.
                   </p>
                 )}
               </div>
-
-              {!userForm.id && (
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Provision License Plan (Optional)</label>
-                  <select
-                    value={userForm.planId}
-                    onChange={(e) => setUserForm({ ...userForm, planId: e.target.value })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  >
-                    <option value="">No Plan (Manually Provision Later)</option>
-                    {plans.filter(p => p.isActive).map(p => (
-                      <option key={p._id} value={p._id}>{p.name} (₹{p.price})</option>
-                    ))}
-                  </select>
-                  <p className="text-[9px] text-slate-400 mt-1.5 leading-normal">
-                    * Selecting a plan will automatically build a 14-day subscription period (unless plan is lifetime) starting today.
-                  </p>
-                </div>
-              )}
 
               <div className="flex justify-end gap-3 border-t border-slate-100 dark:border-slate-850 pt-4">
                 <button 
@@ -875,235 +698,6 @@ const AdminDashboard = () => {
                   className="rounded-xl bg-blue-600 hover:bg-blue-500 py-2 px-6 text-xs font-bold text-white shadow-md cursor-pointer"
                 >
                   {userForm.id ? 'Save Configuration' : 'Send Invitation'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --- PLAN MODAL --- */}
-      {showPlanModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-2xl p-6 shadow-2xl space-y-6">
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-855 pb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {planForm.id ? 'Modify Plan Details' : 'Configure Subscription Tier'}
-              </h3>
-              <button onClick={() => setShowPlanModal(false)} className="text-slate-400 hover:text-white"><X size={16} /></button>
-            </div>
-
-            <form onSubmit={handleSavePlan} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Plan Name</label>
-                <input 
-                  type="text" 
-                  required
-                  value={planForm.name}
-                  onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  placeholder="E.g. Starter, Pro, Business" 
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Short Description</label>
-                <input 
-                  type="text" 
-                  required
-                  value={planForm.description}
-                  onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  placeholder="Plan summary context" 
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Price (₹ INR)</label>
-                  <input 
-                    type="number" 
-                    required
-                    value={planForm.price}
-                    onChange={(e) => setPlanForm({ ...planForm, price: parseFloat(e.target.value) || 0 })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-455 uppercase mb-2">Billing Duration</label>
-                  <select
-                    value={planForm.billingCycle}
-                    onChange={(e) => setPlanForm({ ...planForm, billingCycle: e.target.value })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  >
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                    <option value="lifetime">Lifetime</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Features (Comma separated)</label>
-                <textarea 
-                  rows="3"
-                  required
-                  value={planForm.features}
-                  onChange={(e) => setPlanForm({ ...planForm, features: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none resize-none"
-                  placeholder="Feature 1, Feature 2, Feature 3"
-                ></textarea>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-455 uppercase mb-2">Sort Ordering Weight</label>
-                  <input 
-                    type="number" 
-                    value={planForm.sortOrder}
-                    onChange={(e) => setPlanForm({ ...planForm, sortOrder: parseInt(e.target.value) || 0 })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  />
-                </div>
-                <div className="flex items-center mt-6">
-                  <input 
-                    type="checkbox" 
-                    id="isActive"
-                    checked={planForm.isActive}
-                    onChange={(e) => setPlanForm({ ...planForm, isActive: e.target.checked })}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
-                  />
-                  <label htmlFor="isActive" className="ml-2 block text-xs font-bold text-slate-400 uppercase">Enable Tier</label>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 border-t border-slate-100 dark:border-slate-850 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => setShowPlanModal(false)}
-                  className="rounded-xl border border-slate-200 dark:border-slate-800 py-2 px-4 text-xs font-bold bg-white dark:bg-slate-950 text-slate-400 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="rounded-xl bg-blue-600 hover:bg-blue-500 py-2 px-6 text-xs font-bold text-white shadow-md cursor-pointer"
-                >
-                  Save Plan
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --- SUBSCRIPTION MODAL --- */}
-      {showSubModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-2xl p-6 shadow-2xl space-y-6">
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-855 pb-4">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                {subForm.id ? 'Modify License Details' : 'Allocate Subscription License'}
-              </h3>
-              <button onClick={() => setShowSubModal(false)} className="text-slate-400 hover:text-white"><X size={16} /></button>
-            </div>
-
-            <form onSubmit={handleSaveSub} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Select User</label>
-                <select
-                  disabled={!!subForm.id}
-                  required
-                  value={subForm.userId}
-                  onChange={(e) => setSubForm({ ...subForm, userId: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                >
-                  <option value="">Choose User...</option>
-                  {users.map(u => (
-                    <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-bold text-slate-450 uppercase mb-2">Select Plan</label>
-                <select
-                  required
-                  value={subForm.planId}
-                  onChange={(e) => setSubForm({ ...subForm, planId: e.target.value })}
-                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                >
-                  <option value="">Choose Plan...</option>
-                  {plans.map(p => (
-                    <option key={p._id} value={p._id}>{p.name} (₹{p.price} / {p.billingCycle})</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-455 uppercase mb-2">Start Date</label>
-                  <input 
-                    type="date" 
-                    required
-                    value={subForm.startDate}
-                    onChange={(e) => setSubForm({ ...subForm, startDate: e.target.value })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-455 uppercase mb-2">Expiry Date</label>
-                  <input 
-                    type="date" 
-                    required
-                    value={subForm.expiryDate}
-                    onChange={(e) => setSubForm({ ...subForm, expiryDate: e.target.value })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-455 uppercase mb-2">License status</label>
-                  <select
-                    value={subForm.status}
-                    onChange={(e) => setSubForm({ ...subForm, status: e.target.value })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  >
-                    <option value="active">Active</option>
-                    <option value="expired">Expired</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="pending">Pending</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-455 uppercase mb-2">Payment Details</label>
-                  <select
-                    value={subForm.paymentStatus}
-                    onChange={(e) => setSubForm({ ...subForm, paymentStatus: e.target.value })}
-                    className="w-full rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-250 dark:border-slate-800 px-3 py-2 text-xs text-slate-200 focus:outline-none"
-                  >
-                    <option value="paid">Paid (Fully Cleared)</option>
-                    <option value="pending">Pending Settlement</option>
-                    <option value="failed">Failed Transaction</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 border-t border-slate-100 dark:border-slate-855 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => setShowSubModal(false)}
-                  className="rounded-xl border border-slate-200 dark:border-slate-800 py-2 px-4 text-xs font-bold bg-white dark:bg-slate-950 text-slate-400 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="rounded-xl bg-blue-600 hover:bg-blue-500 py-2 px-6 text-xs font-bold text-white shadow-md cursor-pointer"
-                >
-                  Allocate Plan
                 </button>
               </div>
             </form>

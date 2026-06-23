@@ -82,8 +82,8 @@ const LandingPage = () => {
     subheadline: 'The comprehensive CRM and ERP hub designed for modern enterprises. Track leads, balance accounts, build custom invoices, manage inventory, and generate financial reports in one beautiful dashboard.',
     ctaText: 'Get Started Now',
     ctaLink: '/login',
-    secondaryCtaText: 'View Pricing',
-    secondaryCtaLink: '#pricing',
+    secondaryCtaText: 'Learn More',
+    secondaryCtaLink: '#features',
     overviewImage: '/crm_dashboard_mockup.png'
   };
 
@@ -138,7 +138,6 @@ const LandingPage = () => {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-300">
             <a href="#features" className="hover:text-blue-400 transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-blue-400 transition-colors">Pricing</a>
             <a href="#contact" className="hover:text-blue-400 transition-colors">Contact</a>
           </nav>
 
@@ -171,7 +170,6 @@ const LandingPage = () => {
             className="fixed inset-x-0 z-40 bg-slate-900 border-b border-slate-800 px-6 py-8 md:hidden flex flex-col gap-6 shadow-2xl"
           >
             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Features</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Pricing</a>
             <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium hover:text-blue-400">Contact</a>
             <hr className="border-slate-800" />
             <Link 
@@ -279,73 +277,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-12 sm:py-20 lg:py-32 relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[140px] pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-20">
-            <span className="text-xs font-bold bg-blue-500/10 text-blue-400 px-3.5 py-1.5 rounded-full border border-blue-500/20 uppercase tracking-widest">
-              Simple & Transparent Plans
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-4 sm:mt-6 mb-3">
-              Flexible Subscriptions For Every Scale
-            </h2>
-            <p className="text-slate-400 font-light text-xs sm:text-sm">
-              Choose a subscription that fits your team. Admin-controlled plans allow smooth license adjustments.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto items-stretch">
-            {finalPlans.map((plan, idx) => {
-              const isPro = plan.name.toLowerCase() === 'pro';
-              return (
-                <div 
-                  key={idx}
-                  className={`relative rounded-2xl flex flex-col justify-between p-4 sm:p-6 lg:p-8 border ${
-                    isPro 
-                      ? 'border-blue-500 bg-slate-900/95 shadow-xl shadow-blue-500/5 lg:scale-105 z-10' 
-                      : 'border-slate-800 bg-slate-900/60'
-                  } ${idx === 2 ? 'col-span-2 lg:col-span-1' : ''}`}
-                >
-                  {isPro && (
-                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-blue-400">
-                      Most Popular
-                    </span>
-                  )}
-                  <div>
-                    <h3 className="text-sm sm:text-lg lg:text-xl font-extrabold text-white mb-1.5 sm:mb-2">{plan.name}</h3>
-                    <p className="text-[10px] sm:text-xs text-slate-400 mb-4 sm:mb-6 font-light leading-normal">{plan.description}</p>
-                    <div className="flex items-baseline gap-1 mb-4 sm:mb-8">
-                      <span className="text-2xl sm:text-4xl font-black text-white">₹{plan.price}</span>
-                      <span className="text-[10px] sm:text-sm text-slate-400 font-medium capitalize">/{plan.billingCycle}</span>
-                    </div>
-
-                    <ul className="space-y-2.5 sm:space-y-4 mb-6 sm:mb-8">
-                      {plan.features.map((feat, fidx) => (
-                        <li key={fidx} className="flex items-start gap-2 text-[10px] sm:text-xs text-slate-300">
-                          <Check size={12} className="text-blue-500 shrink-0 mt-0.5" />
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <Link 
-                    to={isAuthenticated ? "/app" : "/login"}
-                    className={`w-full text-center font-bold text-[10px] sm:text-xs rounded-xl py-2.5 sm:py-3.5 transition-all ${
-                      isPro 
-                        ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg' 
-                        : 'border border-slate-700 hover:border-slate-650 text-slate-300 hover:text-white'
-                    }`}
-                  >
-                    {isAuthenticated ? "Select & Continue" : `Select ${plan.name}`}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section */}
       <section className="py-12 sm:py-20 lg:py-32 bg-slate-950">
