@@ -235,6 +235,10 @@ const Invoices = () => {
       const res = await API.get(`/invoices/${invId}`);
       const inv = res.data.data.invoice;
 
+      const hasBankDetails = !!(settings?.bankName || settings?.accountHolderName || settings?.accountNumber || settings?.ifscCode);
+      const qrCodeUrl = settings?.activeQrCode === 'qr2' ? settings?.qrCode2Url : settings?.qrCode1Url;
+      const formattedQrCodeUrl = qrCodeUrl ? (qrCodeUrl.startsWith('http') ? qrCodeUrl : `${BACKEND_URL}${qrCodeUrl}`) : '';
+
       const printWindow = window.open('', '_blank');
       printWindow.document.write(`
         <html>
@@ -243,7 +247,7 @@ const Invoices = () => {
             <style>
               body { font-family: 'Segoe UI', Arial, sans-serif; color: #334155; padding: 40px; margin: 0; line-height: 1.5; }
               .header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
-              .business { font-size: 20px; font-weight: bold; color: #000000; }
+              .business { font-size: 15px; font-weight: bold; color: #000000; }
               .invoice-title { font-size: 28px; color: #2563eb; font-weight: 800; text-align: right; }
               .details { margin-top: 30px; display: flex; justify-content: space-between; }
               .section-title { font-size: 12px; font-weight: bold; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
@@ -256,7 +260,7 @@ const Invoices = () => {
               .totals-box { width: 250px; background-color: #f8fafc; padding: 15px; border-radius: 8px; }
               .totals-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
               .grand-total { font-size: 16px; font-weight: bold; color: #2563eb; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 8px; }
-              .footer { margin-top: 100px; text-align: center; color: #94a3b8; font-size: 12px; }
+              .footer { margin-top: 60px; text-align: center; color: #94a3b8; font-size: 12px; }
               @media print { body { padding: 0; } }
             </style>
           </head>
@@ -365,6 +369,29 @@ const Invoices = () => {
                  </div>
                </div>
              </div>
+
+            ${(hasBankDetails || formattedQrCodeUrl) ? `
+            <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-start; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+              <div>
+                ${hasBankDetails ? `
+                  <div class="section-title">Payment Information (Bank Transfer)</div>
+                  <div style="font-size: 13px; line-height: 1.6; color: #334155;">
+                    ${settings.accountHolderName ? `<b>Account Holder:</b> ${settings.accountHolderName}<br>` : ''}
+                    ${settings.bankName ? `<b>Bank Name:</b> ${settings.bankName}<br>` : ''}
+                    ${settings.accountNumber ? `<b>Account Number:</b> ${settings.accountNumber}<br>` : ''}
+                    ${settings.ifscCode ? `<b>IFSC Code:</b> ${settings.ifscCode}<br>` : ''}
+                  </div>
+                ` : ''}
+              </div>
+              
+              <div style="text-align: center; margin-left: 20px;">
+                ${formattedQrCodeUrl ? `
+                  <img src="${formattedQrCodeUrl}" alt="Scan to Pay" style="max-height: 100px; max-width: 100px; object-fit: contain; border: 1px solid #e2e8f0; padding: 4px; border-radius: 4px;" />
+                  <div style="font-size: 10px; font-weight: bold; color: #1e293b; margin-top: 5px;">Scan to Pay</div>
+                ` : ''}
+              </div>
+            </div>
+            ` : ''}
 
             ${inv.notes ? `<div style="margin-top:40px;font-size:13px;"><b>Notes:</b><br>${inv.notes}</div>` : ''}
 

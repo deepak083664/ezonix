@@ -59,18 +59,18 @@ const generateInvoicePDF = async (invoice, setting, res) => {
       doc.image(logoSource, 50, 40, { fit: [120, 40] });
       
       const textX = 50 + scaledWidth + 10;
-      const textY = 40 + (scaledHeight - 20) / 2; // vertically center font size 20 (approx 20pt height)
+      const textY = 40 + (scaledHeight - 15) / 2; // vertically center font size 15 (approx 15pt height)
 
       // Render brand name next to logo - black text
-      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', textX, textY, { align: 'left', width: 340 - scaledWidth });
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(15).text(setting.businessName || 'ezonix', textX, textY, { align: 'left', width: 340 - scaledWidth });
       headerTextY = Math.max(95, 40 + scaledHeight + 15);
     } catch (e) {
       console.error('Error drawing logo image: ', e);
-      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(15).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
       headerTextY = 75;
     }
   } else {
-    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(20).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
+    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(15).text(setting.businessName || 'ezonix', 50, 45, { align: 'left' });
     headerTextY = 75;
   }
   
